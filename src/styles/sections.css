@@ -85,6 +85,15 @@
   font-size: 13.5px;
   color: var(--text-3);
 }
+.reviews__note {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+.reviews__shown {
+  margin-top: 12px;
+  text-align: center;
+}
 .bars {
   display: grid;
   gap: 7px;

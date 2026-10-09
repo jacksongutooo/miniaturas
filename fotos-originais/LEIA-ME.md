@@ -25,7 +25,7 @@ Aqui ficam as fotos **como foram recebidas**, organizadas em uma pasta por model
 
 "Referência" = serviu para conferir nome, tamanho e descrição; não vira foto de produto.
 
-A pasta `avaliacoes/` é onde entram os prints das avaliações reais das miniaturas (veja o `LEIA-ME.md` dela).
+A pasta `avaliacoes/` guarda os prints das avaliações reais dos anúncios, por anúncio (veja o `LEIA-ME.md` dela).
 
 ## Capas dos anúncios do TikTok Shop (`anuncios-tiktok/`)
 

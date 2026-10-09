@@ -1,7 +1,9 @@
 /**
  * AVALIAÇÕES DE CLIENTES (estilo marketplace)
  * Nota média, distribuição por estrelas, filtros (Todas / Com foto / Mais recentes) e cards.
- * Tudo é calculado a partir da lista em src/products/data/reviews.js.
+ * A lista exibida vem de src/products/data/reviews.js. Quando existem os números oficiais do
+ * anúncio (`stats`, de products.js), nota e total vêm deles — a lista é só uma amostra.
+ * Sem avaliações, a seção mostra um aviso (e nunca avaliações de outro modelo).
  */
 
 import { content } from '../config/content.js';
@@ -36,8 +38,8 @@ function reviewCard(review) {
       </div>
     </header>
     <p class="review__text">${review.text}</p>
-    ${product
-      ? html`<p class="review__product">Modelo: <a href="${hrefFor.product(product.slug)}">${product.name}</a></p>`
+    ${product || review.variant
+      ? html`<p class="review__product">${product ? html`Modelo: <a href="${hrefFor.product(product.slug)}">${product.name}</a>` : ''}${review.variant ? html`${product ? ' · ' : ''}${review.variant}` : ''}</p>`
       : ''}
     ${photos.length
       ? html`<ul class="review__photos">
@@ -53,11 +55,26 @@ function reviewCard(review) {
   </article>`;
 }
 
-/** @param {{ list: Array, id?: string }} props */
-export function reviewsSection({ list, id = 'avaliacoes' }) {
+/**
+ * @param {{ list: Array, stats?: {average:number,total:number,distribution:object|null}|null, note?: string, id?: string }} props
+ *   stats: números oficiais do anúncio; note: de onde eles vêm (ex.: "Avaliações do anúncio no TikTok Shop")
+ */
+export function reviewsSection({ list, stats = null, note = '', id = 'avaliacoes' }) {
   const t = content.reviews;
-  const { total, average, distribution } = summarize(list);
+  const sample = summarize(list);
+  const total = stats ? stats.total : sample.total;
+  const average = stats ? stats.average : sample.average;
+  const distribution = stats ? stats.distribution : sample.distribution;
   const hasPhoto = list.some((r) => r.photos?.length);
+
+  if (!total) {
+    return html`<section class="section" id="${id}" data-reviews aria-labelledby="${id}-title">
+      <div class="container">
+        <h2 class="section__title" id="${id}-title">${t.title}</h2>
+        <p class="muted">${t.none}</p>
+      </div>
+    </section>`;
+  }
 
   return html`<section class="section" id="${id}" data-reviews aria-labelledby="${id}-title">
     <div class="container">
@@ -72,15 +89,18 @@ export function reviewsSection({ list, id = 'avaliacoes' }) {
               <p class="reviews__count">${plural(total, 'avaliação', 'avaliações')}</p>
             </div>
           </div>
-          <ul class="bars" aria-label="Distribuição das notas">
-            ${[5, 4, 3, 2, 1].map(
-              (n) => html`<li class="bars__row">
-                <span class="bars__label">${n} ${n === 1 ? 'estrela' : 'estrelas'}</span>
-                <span class="bars__track"><span class="bars__fill" style="width:${total ? ((distribution[n] / total) * 100).toFixed(1) : 0}%"></span></span>
-                <span class="bars__value">${distribution[n]}</span>
-              </li>`,
-            )}
-          </ul>
+          ${distribution
+            ? html`<ul class="bars" aria-label="Distribuição das notas">
+                ${[5, 4, 3, 2, 1].map(
+                  (n) => html`<li class="bars__row">
+                    <span class="bars__label">${n} ${n === 1 ? 'estrela' : 'estrelas'}</span>
+                    <span class="bars__track"><span class="bars__fill" style="width:${((distribution[n] / total) * 100).toFixed(1)}%"></span></span>
+                    <span class="bars__value">${distribution[n]}</span>
+                  </li>`,
+                )}
+              </ul>`
+            : ''}
+          ${note ? html`<p class="reviews__note">${note}</p>` : ''}
         </div>
 
         <div class="reviews__main">
@@ -91,6 +111,9 @@ export function reviewsSection({ list, id = 'avaliacoes' }) {
           </div>
           <div class="reviews__list" data-reviews-list aria-live="polite"></div>
           <button type="button" class="btn btn--ghost btn--block reviews__more" data-reviews-more hidden>${t.showMore}</button>
+          ${list.length < total
+            ? html`<p class="reviews__note reviews__shown">${t.shown.replace('{n}', list.length).replace('{total}', plural(total, 'avaliação', 'avaliações'))}</p>`
+            : ''}
         </div>
       </div>
     </div>
@@ -103,6 +126,7 @@ export function mountReviews(root, list) {
   if (!section) return;
   const listEl = section.querySelector('[data-reviews-list]');
   const more = section.querySelector('[data-reviews-more]');
+  if (!listEl || !more) return; // seção sem avaliações
   let filter = 'all';
   let visible = PAGE_SIZE;
 

@@ -356,6 +356,10 @@ button {
 .rating__count {
   color: var(--text-3);
 }
+/* Sem avaliações reais: nada de nota, mas o espaço fica reservado (cards alinhados). */
+.rating--empty {
+  min-height: 20px;
+}
 
 /* ── Etiquetas ───────────────────────────────────────────────────────────── */
 

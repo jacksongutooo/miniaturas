@@ -16,6 +16,7 @@ import {
 } from '../src/products/catalog.js';
 import { pickUpsellProducts, isUpsellEligible } from '../src/products/upsell.js';
 import { reviews } from '../src/products/data/reviews.js';
+import { productReviewStats, overallReviewStats } from '../src/products/reviewStats.js';
 
 const all = getProducts();
 const reg = (productId) => ({ productId, qty: 1, bump: false });
@@ -42,6 +43,54 @@ test('toda foto citada em products.js existe em public/', () => {
 test('toda avaliação aponta para um produto que existe', () => {
   const slugs = new Set(all.map((p) => p.slug));
   for (const r of reviews) assert.ok(slugs.has(r.product), `avaliação ${r.id} ligada a "${r.product}", que não existe`);
+});
+
+test('avaliações: campos válidos, ids únicos e nada de nota fora do intervalo', () => {
+  assert.equal(new Set(reviews.map((r) => r.id)).size, reviews.length);
+  for (const r of reviews) {
+    assert.ok(Number.isInteger(r.rating) && r.rating >= 1 && r.rating <= 5, `avaliação ${r.id}: nota inválida`);
+    assert.match(r.date, /^\d{4}-\d{2}-\d{2}$/, `avaliação ${r.id}: data fora do padrão AAAA-MM-DD`);
+    assert.ok(!Number.isNaN(Date.parse(r.date)), `avaliação ${r.id}: data inexistente`);
+    assert.ok(r.name.trim() && r.text.trim(), `avaliação ${r.id}: nome ou texto vazio`);
+  }
+});
+
+test('avaliações: só há nota onde há avaliações reais, e a amostra cabe no total do anúncio', () => {
+  for (const p of all) {
+    const own = reviews.filter((r) => r.product === p.slug);
+    const stats = productReviewStats(p);
+    if (own.length) assert.ok(stats, `${p.name}: há avaliações na página, mas faltam rating e reviewsCount em products.js`);
+    if (stats) assert.ok(own.length <= stats.total, `${p.name}: ${own.length} avaliações exibidas, mas o anúncio tem ${stats.total}`);
+    else assert.ok(p.rating === undefined && p.reviewsCount === undefined, `${p.name}: tem nota sem total de avaliações`);
+  }
+});
+
+test('avaliações: a nota bate com a distribuição por estrelas (quando existe)', () => {
+  for (const p of all) {
+    const stats = productReviewStats(p);
+    if (!stats?.distribution) continue;
+    const points = [5, 4, 3, 2, 1].reduce((sum, n) => sum + n * stats.distribution[n], 0);
+    assert.equal(Math.round((points / stats.total) * 10) / 10, stats.average, `${p.name}: nota diferente da distribuição`);
+  }
+});
+
+test('avaliações reais de cada modelo (anúncios do TikTok Shop em 09/10/2026)', () => {
+  const jesus = productReviewStats(bySlug('jesus-sentado'));
+  assert.deepEqual(jesus, { average: 4.1, total: 46, distribution: { 5: 33, 4: 1, 3: 1, 2: 4, 1: 7 } });
+  assert.deepEqual(productReviewStats(bySlug('maria-sentada')), { average: 4.5, total: 20, distribution: null });
+  assert.deepEqual(productReviewStats(bySlug('sao-jose-sentado')), { average: 4.1, total: 14, distribution: null });
+  // sem avaliações reais ainda: nada de nota inventada
+  for (const slug of ['sagrada-familia', 'divino-espirito-santo', 'boneco-de-neve-articulado']) {
+    assert.equal(productReviewStats(bySlug(slug)), null, `${slug} não deveria ter nota`);
+    assert.equal(reviews.filter((r) => r.product === slug).length, 0, `${slug} não deveria ter avaliações`);
+  }
+});
+
+test('nota geral da loja: média ponderada dos 3 anúncios (46 + 20 + 14 = 80 avaliações)', () => {
+  const overall = overallReviewStats(all);
+  assert.equal(overall.total, 80);
+  assert.equal(Math.round(overall.average * 10) / 10, 4.2);
+  assert.equal(overall.distribution, null); // só o Jesus tem a distribuição completa
 });
 
 test('modelos relacionados existem e não apontam para si mesmos', () => {

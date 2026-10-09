@@ -1,129 +1,71 @@
 /**
- * AVALIAÇÕES DE CLIENTES
+ * AVALIAÇÕES DE CLIENTES — REAIS, copiadas dos anúncios do TikTok Shop
  * ----------------------------------------------------------------------------
- * TODO: adicionar avaliações reais.
- * As avaliações abaixo são EXEMPLOS inventados só para testar o layout.
- * Apague todas e cole as reais — a nota média, a quantidade e a distribuição
- * por estrelas são calculadas automaticamente a partir desta lista.
+ * Origem: prints enviados em 09/10/2026 (ficam em fotos-originais/avaliacoes/).
+ *  • Os textos estão como o cliente escreveu (com os erros de digitação) e os nomes aparecem
+ *    mascarados, como o próprio TikTok mostra ("M**a S**i").
+ *  • O TikTok mostra a data como "há 1d" ou "1 sem."; aqui viraram datas aproximadas, contadas
+ *    a partir do dia dos prints (2026-10-09).
+ *  • Avaliações cortadas no print, sem data legível ou sem texto não entraram.
+ *  • Não há fotos de clientes (o ideal é pedir autorização a cada cliente antes de usar).
+ *
+ * REGRA: só entra avaliação de cliente de verdade. Nunca escreva, "melhore" ou invente avaliações —
+ * isso é propaganda enganosa (Código de Defesa do Consumidor, art. 37) e as plataformas punem.
+ *
+ * Esta lista é só uma AMOSTRA. A nota, o total e a distribuição oficiais de cada modelo
+ * (rating, reviewsCount, ratingBreakdown) ficam em products.js e vêm do anúncio.
  *
  * Campos:
  *   id        único
- *   name      só o primeiro nome do cliente
+ *   name      como aparece no anúncio
  *   rating    1 a 5
  *   date      'AAAA-MM-DD'
  *   text      comentário
- *   product   slug do modelo comprado (products.js) — liga a avaliação à página do produto
- *   photos    fotos enviadas pelo cliente (opcional). Ex.: ['/images/avaliacoes/avaliacao-01.jpg']
+ *   product   slug do modelo (products.js) — a avaliação aparece na página dele
+ *   variant   opção que o cliente comprou, quando ajuda (ex.: 'Kit 1 Jesus + 1 Maria')
+ *   photos    (opcional) fotos enviadas pelo cliente — só com autorização dele
  */
+
+const JESUS = 'jesus-sentado';
+// A Maria é vendida no TikTok Shop dentro do anúncio "Kit Jesus e Maria" (Kit 1+1, Kit 2+2 e 2 Marias).
+const MARIA = 'maria-sentada';
+const JOSE = 'sao-jose-sentado';
+const KIT_1_1 = 'Kit 1 Jesus + 1 Maria';
+const KIT_2_2 = 'Kit 2 Jesus + 2 Marias';
+
 export const reviews = [
+  { id: 1, name: 'W**n A**s', rating: 5, date: '2026-10-09', text: 'Muito lindo, entrega rápida. Perfeito. Certeza que irei comprar mais', product: MARIA, variant: KIT_1_1 },
+  { id: 2, name: 'm**e i**s', rating: 5, date: '2026-10-08', text: 'achei lindo, é bem pequeno mas achei lindo', product: JESUS },
+  { id: 3, name: 'C**a R**a', rating: 5, date: '2026-10-08', text: 'Lindinho , tamanho bom vou colocar no espelho do carro , mas pensei que ele já vinha com a fita dupla face', product: JESUS },
+  { id: 4, name: 'j**_', rating: 5, date: '2026-10-08', text: 'Perfeitooooooo', product: JESUS },
+  { id: 5, name: 'G**u S**r', rating: 5, date: '2026-10-08', text: 'Muito fofinho! Bem embalado e veio com cheirinho! Sao bem pequeninos mas muito fofos', product: MARIA, variant: KIT_2_2 },
+  { id: 6, name: 't**a', rating: 4, date: '2026-10-08', text: 'Bacana. Só achei que o produto fosse um pouco maior, mas eles são muito bonitinhos.', product: MARIA, variant: KIT_2_2 },
+  { id: 7, name: 'A** C**e', rating: 5, date: '2026-10-08', text: 'Muito boa qualidade', product: MARIA, variant: '2 Marias' },
+  { id: 8, name: 'e**a', rating: 5, date: '2026-10-08', text: 'Muito bom', product: MARIA, variant: KIT_1_1 },
+  { id: 9, name: 'B**o B**n', rating: 5, date: '2026-10-08', text: 'Lindos..', product: MARIA, variant: KIT_1_1 },
+  { id: 10, name: 'M**a S**i', rating: 5, date: '2026-10-08', text: 'Lindoooo', product: JOSE },
+  { id: 11, name: 'J**a C**a', rating: 5, date: '2026-10-06', text: 'Eu simplesmente amei', product: MARIA, variant: KIT_1_1 },
+  { id: 12, name: 'C**s', rating: 5, date: '2026-10-05', text: 'Ele é como esperado, simples e bonitinho.', product: JESUS },
+  { id: 13, name: 'P**a G**e', rating: 5, date: '2026-10-04', text: 'Produto chegou na data certa e perfeito', product: JESUS },
+  { id: 14, name: 'a**', rating: 5, date: '2026-10-02', text: 'É lindo delicado valeu mto a compra', product: JESUS },
+  { id: 15, name: 'A** S**p', rating: 5, date: '2026-10-02', text: 'Lindos, um é meu e outro de presente.', product: JESUS },
+  { id: 16, name: 'K**n C**s', rating: 5, date: '2026-10-02', text: 'Muito lindo, perfeito', product: JOSE },
+  { id: 17, name: 'S**i F**a', rating: 5, date: '2026-09-29', text: 'Imaginei que fossem maiores... mas são lindos', product: MARIA, variant: KIT_2_2 },
+  { id: 18, name: 'A**y A**i ✨**', rating: 5, date: '2026-09-28', text: 'Muito bom e entrega rápida! 🫶🏼', product: JESUS },
+  { id: 19, name: 'H**n J**a', rating: 5, date: '2026-09-28', text: 'Poderia variar a cor do cabelo, mais o restante tudo ok recomendo a comprar', product: JESUS },
+  { id: 20, name: 'L**💞', rating: 5, date: '2026-09-28', text: 'Excelente acabamento muito bem feito, amei', product: JESUS },
+  { id: 21, name: 'P**a M**s', rating: 5, date: '2026-09-28', text: 'Amei a miniatura,de jesus e Maria Super indico', product: MARIA, variant: KIT_2_2 },
+  { id: 22, name: 'N**a O**a', rating: 5, date: '2026-09-25', text: 'Tudo certo com a entrega. Muito fofo', product: JESUS },
+  { id: 23, name: 'c**o', rating: 5, date: '2026-09-25', text: 'Gostei, recomendo. Satisfeito', product: JESUS },
   {
-    id: 1,
-    name: 'Mariana',
-    rating: 5,
-    date: '2026-09-28',
-    text: 'Chegou bem embalada e o acabamento é muito bonito. Combinou direitinho com a estante da sala.',
-    product: 'maria-sentada',
-    photos: ['/images/avaliacoes/avaliacao-01.jpg', '/images/avaliacoes/avaliacao-02.jpg'],
-  },
-  {
-    id: 2,
-    name: 'Carlos',
+    id: 24,
+    name: 'A**s d** M**a e** c**ê',
     rating: 5,
     date: '2026-09-25',
-    text: 'Comprei três para dar de presente e já ganhei o desconto automático. Todas vieram iguais às fotos.',
-    product: 'sao-jose-sentado',
-    photos: ['/images/avaliacoes/avaliacao-03.jpg'],
+    text: 'Estou apaixonada, é uma perfeição o boneco, com riqueza de detalhes.A entrega foi rápida e com toda certeza irei comprar mais para presentear meus familiares,super indico.Ficou lindo no meu ateliê,e o diferencial da novidade,eu não conhecia nada com essa técnica de 3D. Comprarei mais vezes !',
+    product: JESUS,
   },
-  {
-    id: 3,
-    name: 'Juliana',
-    rating: 5,
-    date: '2026-09-19',
-    text: 'Os detalhes da pintura são ótimos, ainda mais pelo preço. A entrega foi dentro do prazo.',
-    product: 'jesus-sentado',
-    photos: [],
-  },
-  {
-    id: 4,
-    name: 'Rafael',
-    rating: 4,
-    date: '2026-09-14',
-    text: 'Peça bem feita. Esperava um pouco maior, mas o tamanho está igual ao descrito no anúncio.',
-    product: 'sagrada-familia',
-    photos: ['/images/avaliacoes/avaliacao-04.jpg'],
-  },
-  {
-    id: 5,
-    name: 'Patrícia',
-    rating: 5,
-    date: '2026-09-09',
-    text: 'Fácil de comprar pelo celular e o atendimento respondeu minha dúvida rapidinho.',
-    product: 'jesus-sentado',
-    photos: [],
-  },
-  {
-    id: 6,
-    name: 'Eduardo',
-    rating: 5,
-    date: '2026-09-02',
-    text: 'Embalagem muito bem protegida, nada quebrou no transporte. Recomendo.',
-    product: 'sagrada-familia',
-    photos: ['/images/avaliacoes/avaliacao-05.jpg', '/images/avaliacoes/avaliacao-06.jpg'],
-  },
-  {
-    id: 7,
-    name: 'Fernanda',
-    rating: 5,
-    date: '2026-08-27',
-    text: 'Comprei para a minha mãe e ela adorou o presente. Veio bem acabado.',
-    product: 'maria-sentada',
-    photos: [],
-  },
-  {
-    id: 8,
-    name: 'Lucas',
-    rating: 4,
-    date: '2026-08-21',
-    text: 'Gostei bastante. O código de rastreio chegou no mesmo dia da postagem.',
-    product: 'sao-jose-sentado',
-    photos: [],
-  },
-  {
-    id: 9,
-    name: 'Beatriz',
-    rating: 5,
-    date: '2026-08-15',
-    text: 'Pedi cinco modelos diferentes e o desconto foi aplicado certinho no carrinho. Ficaram lindas juntas.',
-    product: 'maria-sentada',
-    photos: ['/images/avaliacoes/avaliacao-07.jpg'],
-  },
-  {
-    id: 10,
-    name: 'André',
-    rating: 5,
-    date: '2026-08-08',
-    text: 'Ótimo custo-benefício. A peça é leve e o acabamento é bem caprichado.',
-    product: 'divino-espirito-santo',
-    photos: [],
-  },
-  {
-    id: 11,
-    name: 'Camila',
-    rating: 3,
-    date: '2026-07-30',
-    text: 'A miniatura é bonita, mas a entrega demorou um pouco mais do que o previsto na minha região.',
-    product: 'boneco-de-neve-articulado',
-    photos: [],
-  },
-  {
-    id: 12,
-    name: 'Thiago',
-    rating: 5,
-    date: '2026-07-22',
-    text: 'Já é a segunda compra. Gosto de poder combinar modelos diferentes no mesmo pedido.',
-    product: 'jesus-sentado',
-    photos: ['/images/avaliacoes/avaliacao-08.jpg'],
-  },
+  { id: 25, name: 'J**a P**s', rating: 5, date: '2026-09-17', text: 'Ótima qualidade, perfeito', product: MARIA, variant: KIT_2_2 },
 ];
 
 export default reviews;

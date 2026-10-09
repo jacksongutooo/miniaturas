@@ -4,8 +4,8 @@
  * TODO: adicionar os demais modelos. (já pedidos: Frei Gilson, Santa Teresinha, São Bento,
  *       Kit Jesus e Maria, Kit Natalino — faltam preço e fotos; veja fotos-originais/LEIA-ME.md)
  * TODO: confirmar tamanhos.        (height / width — vieram dos anúncios; weight/material/finish ficam em branco)
- * TODO: adicionar avaliações reais. (rating / reviewsCount são de EXEMPLO, exceto os do Jesus Sentado,
- *                                   que vieram do anúncio do TikTok Shop)
+ * TODO: avaliações dos demais modelos. (Sagrada Família, Divino Espírito Santo e Boneco de Neve ainda não
+ *                                   têm avaliações reais — mande os prints do anúncio; veja fotos-originais/avaliacoes/)
  *
  * As fotos de cada modelo são geradas por scripts/preparar-fotos.py (capa, outra foto e medidas).
  *
@@ -20,7 +20,12 @@
  *   price            preço regular. Se omitido, vale storeConfig.productPrice (R$ 17,90). Conjuntos podem ter
  *                    preço próprio (ex.: Sagrada Família, R$ 43,90) — e, por custarem mais que a miniatura
  *                    padrão, nunca são oferecidos a R$ 12,90 (ver src/products/upsell.js).
- *   rating           nota média (0–5) e reviewsCount: quantidade de avaliações
+ *   rating           nota média (0–5) e reviewsCount: quantidade de avaliações — SEMPRE os números reais do anúncio.
+ *                    Sem avaliações reais, não ponha nada: o site simplesmente não mostra nota.
+ *   ratingBreakdown  (opcional) { 5: n, 4: n, 3: n, 2: n, 1: n } — só vale se somar reviewsCount
+ *   ratingListing    (opcional) nome do anúncio de origem; modelos que são variações do mesmo anúncio
+ *                    usam o mesmo e são contados uma vez só na nota geral da loja
+ *   ratingSource     (opcional) texto mostrado junto da nota, dizendo de onde ela vem
  *   images           de 1 a 6 fotos (a primeira é a capa). Proporção quadrada (1:1) recomendada.
  *   description      texto da página do produto
  *   height, width, weight, material, finish   ficha técnica (null = a linha some da página)
@@ -60,9 +65,12 @@ const list = [
     slug: 'jesus-sentado',
     name: 'Jesus Sentado',
     category: 'Jesus',
-    // Números reais do anúncio no TikTok Shop (captura de 09/10/2026): 4,2 ★ (44 avaliações), 550 vendidos.
-    rating: 4.2,
-    reviewsCount: 44,
+    // Números reais do anúncio no TikTok Shop em 09/10/2026: 4,1 ★ (46 avaliações; 33 de 5 estrelas, 1 de 4,
+    // 1 de 3, 4 de 2 e 7 de 1) e 550 vendidos (print do mesmo dia, quando o anúncio tinha 44 avaliações).
+    rating: 4.1,
+    reviewsCount: 46,
+    ratingBreakdown: { 5: 33, 4: 1, 3: 1, 2: 4, 1: 7 },
+    ratingSource: 'Avaliações do anúncio no TikTok Shop',
     sales: 550,
     bestSeller: true,
     images: ['/images/jesus-sentado-1.jpg', '/images/jesus-sentado-2.jpg', '/images/jesus-sentado-3.jpg'],
@@ -76,8 +84,12 @@ const list = [
     slug: 'maria-sentada',
     name: 'Maria Sentada',
     category: 'Nossa Senhora',
-    rating: 4.8,
-    reviewsCount: 41,
+    // No TikTok Shop a Maria é vendida dentro do anúncio "Kit Jesus e Maria" (Kit 1+1, Kit 2+2 e 2 Marias):
+    // 4,5 ★ (20 avaliações em 09/10/2026).
+    rating: 4.5,
+    reviewsCount: 20,
+    ratingListing: 'kit-jesus-e-maria',
+    ratingSource: 'Avaliações do anúncio "Kit Jesus e Maria" no TikTok Shop',
     images: ['/images/maria-sentada-1.jpg', '/images/maria-sentada-2.jpg', '/images/maria-sentada-3.jpg'],
     ...semFichaExtra,
     height: '5 cm',
@@ -89,8 +101,12 @@ const list = [
     slug: 'sao-jose-sentado',
     name: 'São José Sentado',
     category: 'Santos',
-    rating: 4.8,
-    reviewsCount: 37,
+    // No TikTok Shop o São José é uma variação do anúncio dos santos (com São Bento e São Miguel):
+    // 4,1 ★ (14 avaliações em 09/10/2026) — a nota é do anúncio todo.
+    rating: 4.1,
+    reviewsCount: 14,
+    ratingListing: 'santos',
+    ratingSource: 'Avaliações do anúncio dos santos no TikTok Shop (inclui São Bento e São Miguel)',
     images: ['/images/sao-jose-sentado-1.jpg', '/images/sao-jose-sentado-2.jpg', '/images/sao-jose-sentado-3.jpg'],
     ...semFichaExtra,
     height: '5 cm',
@@ -102,8 +118,7 @@ const list = [
     slug: 'sagrada-familia',
     name: 'Sagrada Família',
     category: 'Família',
-    rating: 4.9,
-    reviewsCount: 66,
+    // TODO: avaliações reais (rating e reviewsCount do anúncio) — ainda não enviadas.
     images: ['/images/sagrada-familia-1.jpg', '/images/sagrada-familia-2.jpg', '/images/sagrada-familia-3.jpg'],
     ...semFichaExtra,
     height: '5 cm',
@@ -119,8 +134,7 @@ const list = [
     slug: 'divino-espirito-santo',
     name: 'Divino Espírito Santo',
     category: 'Espírito Santo',
-    rating: 4.8,
-    reviewsCount: 29,
+    // TODO: avaliações reais (rating e reviewsCount do anúncio) — ainda não enviadas.
     images: ['/images/divino-espirito-santo-1.jpg', '/images/divino-espirito-santo-2.jpg', '/images/divino-espirito-santo-3.jpg'],
     ...semFichaExtra,
     height: '10 cm',
@@ -135,8 +149,7 @@ const list = [
     slug: 'boneco-de-neve-articulado',
     name: 'Boneco de Neve Articulado',
     category: 'Natal',
-    rating: 4.7,
-    reviewsCount: 24,
+    // TODO: avaliações reais (rating e reviewsCount do anúncio) — ainda não enviadas.
     images: [
       '/images/boneco-de-neve-articulado-1.jpg',
       '/images/boneco-de-neve-articulado-2.jpg',

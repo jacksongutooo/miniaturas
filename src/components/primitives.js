@@ -28,8 +28,12 @@ export function stars(rating, { size = 'md' } = {}) {
   return html`<span class="stars stars--${size}" style="--p:${pct.toFixed(1)}%" role="img" aria-label="Nota ${formatRating(rating)} de 5">★★★★★</span>`;
 }
 
-/** ★ 4,9 (123) — versão compacta para cards. */
+/**
+ * ★ 4,9 (123) — versão compacta para cards.
+ * Sem avaliações reais não mostra nota, mas reserva o espaço para os cards ficarem alinhados.
+ */
 export function ratingCompact(product) {
+  if (!product.reviewsCount) return html`<span class="rating rating--empty" aria-hidden="true"></span>`;
   return html`<span class="rating" aria-label="Nota ${formatRating(product.rating)} de 5, ${product.reviewsCount} avaliações">
     ${icon('star', { size: 14, class: 'rating__star' })}
     <strong>${formatRating(product.rating)}</strong>

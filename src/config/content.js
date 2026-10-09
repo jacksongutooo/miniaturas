@@ -38,6 +38,9 @@ export const content = {
     filters: { all: 'Todas', photo: 'Com foto', recent: 'Mais recentes' },
     showMore: 'Ver mais avaliações',
     empty: 'Ainda não há avaliações neste filtro.',
+    none: 'Este modelo ainda não tem avaliações.',
+    shown: 'Mostrando {n} de {total}',
+    source: 'Avaliações de clientes dos anúncios no TikTok Shop',
   },
 
   customerGallery: {

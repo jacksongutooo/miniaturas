@@ -10,6 +10,7 @@ import { icon } from '../utils/icons.js';
 import { moneyFromReais, plural } from '../utils/format.js';
 import { getProductBySlug, getRelatedProducts } from '../products/catalog.js';
 import { reviews } from '../products/data/reviews.js';
+import { productReviewStats } from '../products/reviewStats.js';
 import { getMaxQty, isInStock, lowStockLabel } from '../services/inventory.js';
 import { track } from '../services/analytics.js';
 import { getShippingPolicyText } from '../services/shipping.js';
@@ -45,9 +46,9 @@ export default function ProductPage({ slug }) {
   const related = getRelatedProducts(product, 4);
   const specs = SPECS.filter(([key]) => product[key]);
 
-  // Avaliações deste modelo; se houver poucas, mostra todas (evita seção vazia).
-  const own = reviews.filter((r) => r.product === product.slug);
-  const reviewList = own.length >= 2 ? own : reviews;
+  // Só avaliações DESTE modelo (nunca de outro). Sem avaliações reais, não mostra nota.
+  const reviewList = reviews.filter((r) => r.product === product.slug);
+  const reviewStats = productReviewStats(product);
 
   const addLabel = inStock ? 'Adicionar ao carrinho' : 'Esgotado';
   const shippingPolicy = getShippingPolicyText();
@@ -70,11 +71,13 @@ export default function ProductPage({ slug }) {
             </button>
           </div>
 
-          <a class="pdp__rating" href="#avaliacoes" data-action="scroll-to" data-target="avaliacoes" aria-label="Nota ${formatRating(product.rating)} de 5, ${product.reviewsCount} avaliações. Ver avaliações">
-            ${stars(product.rating)}
-            <strong>${formatRating(product.rating)}</strong>
-            <span class="muted">(${plural(product.reviewsCount, 'avaliação', 'avaliações')})</span>
-          </a>
+          ${reviewStats
+            ? html`<a class="pdp__rating" href="#avaliacoes" data-action="scroll-to" data-target="avaliacoes" aria-label="Nota ${formatRating(reviewStats.average)} de 5, ${reviewStats.total} avaliações. Ver avaliações">
+                ${stars(reviewStats.average)}
+                <strong>${formatRating(reviewStats.average)}</strong>
+                <span class="muted">(${plural(reviewStats.total, 'avaliação', 'avaliações')})</span>
+              </a>`
+            : ''}
 
           <p class="pdp__price">${moneyFromReais(product.price)}</p>
 
@@ -129,7 +132,7 @@ export default function ProductPage({ slug }) {
       </div>
     </section>
 
-    ${reviewsSection({ list: reviewList })}
+    ${reviewsSection({ list: reviewList, stats: reviewStats, note: product.ratingSource ?? '' })}
     ${trustSection()}
 
     ${inStock

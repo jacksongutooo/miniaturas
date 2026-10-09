@@ -30,7 +30,7 @@ Publicação: qualquer hospedagem estática (Vercel, Netlify, Cloudflare Pages, 
 | CNPJ, razão social, endereço (rodapé) | `src/config/store.js` → `company` |
 | Produtos (nomes, fotos, medidas, preço próprio de conjuntos, estoque…) | `src/products/data/products.js` |
 | Categorias | `src/products/data/categories.js` |
-| Avaliações | `src/products/data/reviews.js` |
+| Avaliações (textos) e notas (números do anúncio) | `src/products/data/reviews.js` e, em `products.js`, `rating`, `reviewsCount`, `ratingBreakdown` |
 | Fotos de clientes ("Veja como elas ficam") | `src/products/data/gallery.js` |
 | Textos da página (destaques, presente, embalagem, confiança, rodapé) | `src/config/content.js` |
 | Privacidade, termos, trocas, política de envio, contato | `src/config/pages.js` |
@@ -63,7 +63,6 @@ Não há mais modelos de teste no catálogo. Continuam provisórias (placeholder
 ```
 public/images/<modelo>-1.jpg … <modelo>-6.jpg        (até 6 fotos por produto; a 1ª é a capa)
 public/images/clientes/cliente-01.jpg …              (galeria "Veja como elas ficam")
-public/images/avaliacoes/avaliacao-01.jpg …          (fotos nas avaliações)
 public/images/embalagem.jpg · presente.jpg · compartilhamento.jpg (1200×630)
 public/images/logo.svg · public/favicon.svg
 ```
@@ -76,6 +75,16 @@ Recomendação: fotos **quadradas (1:1)**, ~800–1000 px, JPG/WebP otimizados (
 2. Copie um bloco em `products.js` e mude `id`, `slug`, `name`, `category` e `images`. Catálogo, busca, página do produto, relacionados e sugestões da oferta passam a incluí-lo automaticamente. Os chips de categoria só aparecem quando a categoria tem produto.
 
 Detalhes úteis: `stock: 0` mostra "Esgotado" e bloqueia a compra (e a oferta de R$ 12,90 nunca o sugere); `stock` de 1 a 4 mostra "Restam apenas N unidades". Conjuntos podem ter **preço próprio** (`price: 43.9`, como a Sagrada Família): por custarem mais que a miniatura padrão, **nunca** entram na oferta de R$ 12,90.
+
+### Avaliações
+
+Só avaliações **reais**, copiadas dos anúncios do TikTok Shop (prints em `fotos-originais/avaliacoes/`, um por anúncio). Nunca escreva, "melhore" ou invente avaliações: é propaganda enganosa (Código de Defesa do Consumidor, art. 37) e as plataformas punem.
+
+- **`reviews.js`** guarda uma *amostra* dos comentários: nome como o TikTok mostra (mascarado, ex.: `M**a S**i`), nota, data aproximada, texto, o modelo (`product`) e, se ajudar, a opção comprada (`variant`, ex.: "Kit 1 Jesus + 1 Maria"). Sem fotos de clientes (só com autorização deles).
+- **`products.js`** guarda os números oficiais do anúncio: `rating`, `reviewsCount` e, se aparecer completa no anúncio, `ratingBreakdown` (quantas de 5, 4, 3, 2 e 1 estrela). É isso que o site mostra como nota e total; a lista de comentários é só uma amostra ("Mostrando 13 de 46 avaliações").
+- **Sem avaliações reais, o modelo não mostra nota** (nem estrelas no card) e a página dele diz que ainda não há avaliações. Nunca aparecem avaliações de outro modelo.
+- A nota geral da home é a média dos anúncios com avaliações; modelos que são variações do mesmo anúncio usam o mesmo `ratingListing` e contam uma vez só.
+- Estado atual: **Jesus Sentado** (4,1 · 46), **Maria Sentada** (4,5 · 20, do anúncio "Kit Jesus e Maria") e **São José Sentado** (4,1 · 14, do anúncio dos santos). Faltam Sagrada Família, Divino Espírito Santo e Boneco de Neve.
 
 ---
 
@@ -103,7 +112,7 @@ Vitrine (os produtos já aparecem no topo, sem banner) → **Adicionar** (aviso 
 | **Frete** | regra definida: grátis a partir de 2 unidades, 1 unidade = R$ 5,90 (Correios Mini). **Prazo de entrega ainda provisório** (5 a 10 dias úteis) — confirme o prazo real do Mini Envios | `storeConfig.shipping` (prazos em `options[].minDays/maxDays` e `info.deliveryTime`). Para cobrar por CEP/região: `src/services/shipping.js` |
 | **Estoque** | vem do campo `stock` do produto | `src/services/inventory.js` |
 | **Pedidos** | só ficam na sessão do navegador (não há backend) | seu endpoint de pedidos |
-| **Avaliações / fotos / textos legais** | exemplos inventados | `reviews.js`, `gallery.js`, `pages.js` (revisar com jurídico/contador) |
+| **Avaliações / fotos de clientes / textos legais** | avaliações reais para 3 modelos (faltam 3); a galeria de fotos de clientes e os textos legais ainda são exemplos | `reviews.js`, `products.js`, `gallery.js`, `pages.js` (revisar com jurídico/contador) |
 
 ## Analytics
 
