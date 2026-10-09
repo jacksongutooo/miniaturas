@@ -41,7 +41,27 @@ Para ver tudo que ainda é provisório: `grep -rn "TODO" src public index.html`.
 
 ### Fotos
 
-Os arquivos de `public/images/` são **placeholders** com o nome do arquivo escrito. Substitua mantendo o mesmo nome, ou altere os caminhos em `products.js`:
+**Os 6 modelos reais** (Jesus Sentado, Maria Sentada, São José Sentado, Sagrada Família, Divino Espírito Santo e Boneco de Neve Articulado) já têm 3 fotos padronizadas cada (900 × 900 px, JPG leve, sem dados de localização):
+
+| Arquivo | O que é |
+|---|---|
+| `public/images/<modelo>-1.jpg` | **foto de estúdio**: fundo removido, peça centralizada, fundo off-white suave e sombra de contato |
+| `public/images/<modelo>-2.jpg` | a **cena original**, recortada em quadrado |
+| `public/images/<modelo>-3.jpg` | **medidas** (altura/largura) desenhadas sobre a peça |
+
+Elas são geradas por `scripts/preparar-fotos.py` a partir das fotos guardadas em `fotos-originais/` (uma pasta por modelo; veja o `LEIA-ME.md` dela). Para refazer ou acrescentar fotos, sem enviar nada para serviços externos:
+
+```bash
+python3 -m venv .venv-fotos
+.venv-fotos/bin/pip install -r scripts/requirements-fotos.txt
+.venv-fotos/bin/python scripts/preparar-fotos.py                      # todos os modelos
+.venv-fotos/bin/python scripts/preparar-fotos.py jesus-sentado        # só um
+.venv-fotos/bin/python scripts/preparar-fotos.py --fundo branco       # fundo branco puro (padrão: estúdio)
+```
+
+> **Qualidade:** as fotos recebidas eram **capturas de tela de celular (~739 px)**, então o recorte e a nitidez têm limite. Quando houver as fotos originais da câmera (ou as imagens do anúncio, em tamanho cheio), é só colocá-las em `fotos-originais/` e rodar o script de novo — o resultado melhora sozinho.
+
+Os **modelos provisórios** (ids 1, 2, 3, 6, 7 e 8) usam placeholders cinza com o nome do arquivo. As demais imagens também são provisórias; substitua mantendo o mesmo nome, ou altere os caminhos em `products.js`:
 
 ```
 public/images/produto-01-1.jpg … produto-01-6.jpg   (até 6 fotos por produto; a 1ª é a capa)
@@ -55,8 +75,10 @@ Recomendação: fotos **quadradas (1:1)**, ~800–1000 px, JPG/WebP otimizados (
 
 ### Adicionar um produto
 
-Copie um bloco em `products.js` e mude `id`, `slug`, `name`, `category` e `images`. Catálogo, busca, página do produto, relacionados e sugestões da oferta passam a incluí-lo automaticamente.
-Exemplos prontos no arquivo: **São José** (`stock: 0` → "Esgotado") e **São Francisco de Assis** (`stock: 4` → "Restam apenas 4 unidades").
+1. Ponha a foto em `fotos-originais/<slug>/cena.jpeg` e acrescente uma linha em `PRODUTOS` no `scripts/preparar-fotos.py` (slug e medidas); rode o script. *(Se já tiver as fotos prontas, pule este passo e copie-as para `public/images/`.)*
+2. Copie um bloco em `products.js` e mude `id`, `slug`, `name`, `category` e `images`. Catálogo, busca, página do produto, relacionados e sugestões da oferta passam a incluí-lo automaticamente.
+
+Exemplos prontos no arquivo (modelos provisórios): **Nossa Senhora de Fátima** (`stock: 0` → "Esgotado") e **Santo Antônio** (`stock: 4` → "Restam apenas 4 unidades"). Os modelos provisórios têm `upsellEligible: false`, para a oferta de R$ 12,90 só sugerir modelos reais.
 
 ---
 
@@ -102,6 +124,8 @@ src/
   utils/       pricing · discount · freeShipping · format · html (escape automático) · icons · storage · validators · pinchZoom…
   styles/      tokens · base · header · catalog · product · cart · checkout · sections · lightbox
 public/        favicon.svg · images/
+scripts/       preparar-fotos.py (tira o fundo e padroniza as fotos) · requirements-fotos.txt
+fotos-originais/  fotos recebidas, uma pasta por modelo (+ LEIA-ME.md; não vão para o site)
 tests/         pricing.test.js · shipping.test.js · catalog.test.js
 ```
 

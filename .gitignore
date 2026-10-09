@@ -4,3 +4,7 @@ dist
 *.log
 .env
 .env.*
+
+# ambiente Python do script de fotos
+.venv-fotos/
+__pycache__/

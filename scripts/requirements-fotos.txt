@@ -1,0 +1,6 @@
+# Dependências do script scripts/preparar-fotos.py (só para preparar fotos; o site não usa nada disso)
+rembg[cpu]>=2.0.60
+pillow>=10
+pillow-heif>=0.16
+scipy>=1.11
+numpy>=1.26

@@ -18,6 +18,8 @@ export const categories = [
   { id: 'nossa-senhora', label: 'Nossa Senhora', type: 'category', match: 'Nossa Senhora' },
   { id: 'jesus', label: 'Jesus', type: 'category', match: 'Jesus' },
   { id: 'familia', label: 'Família', type: 'category', match: 'Família' },
+  { id: 'espirito-santo', label: 'Espírito Santo', type: 'category', match: 'Espírito Santo' },
+  { id: 'natal', label: 'Natal', type: 'category', match: 'Natal' },
 ];
 
 export default categories;

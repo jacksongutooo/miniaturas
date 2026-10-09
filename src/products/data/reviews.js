@@ -58,7 +58,7 @@ export const reviews = [
     rating: 5,
     date: '2026-09-09',
     text: 'Fácil de comprar pelo celular e o atendimento respondeu minha dúvida rapidinho.',
-    product: 'jesus-misericordioso',
+    product: 'jesus-sentado',
     photos: [],
   },
   {
@@ -94,7 +94,7 @@ export const reviews = [
     rating: 5,
     date: '2026-08-15',
     text: 'Pedi cinco modelos diferentes e o desconto foi aplicado certinho no carrinho. Ficaram lindas juntas.',
-    product: 'nossa-senhora-das-gracas',
+    product: 'maria-sentada',
     photos: ['/images/avaliacoes/avaliacao-07.jpg'],
   },
   {
@@ -103,7 +103,7 @@ export const reviews = [
     rating: 5,
     date: '2026-08-08',
     text: 'Ótimo custo-benefício. A peça é leve e o acabamento é bem caprichado.',
-    product: 'sagrado-coracao-de-jesus',
+    product: 'divino-espirito-santo',
     photos: [],
   },
   {
@@ -112,7 +112,7 @@ export const reviews = [
     rating: 3,
     date: '2026-07-30',
     text: 'A miniatura é bonita, mas a entrega demorou um pouco mais do que o previsto na minha região.',
-    product: 'sao-francisco-de-assis',
+    product: 'boneco-de-neve-articulado',
     photos: [],
   },
   {
