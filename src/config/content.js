@@ -13,18 +13,12 @@ export const content = {
   // Faixa fina acima do cabeçalho.
   topBar: ['Envio para todo Brasil', 'Compra segura', 'Descontos progressivos'],
 
-  hero: {
-    // {price} é trocado automaticamente por productPrice (config/store.js).
-    title: 'Miniaturas a partir de {price}',
-    text: 'Escolha seus modelos favoritos e desbloqueie descontos conforme adiciona mais unidades.',
-    cta: 'Ver miniaturas',
-    note: 'Você pode combinar modelos diferentes.',
-  },
-
   catalog: {
     title: 'Escolha sua miniatura',
     searchPlaceholder: 'Buscar miniaturas...',
     empty: 'Nenhuma miniatura encontrada.',
+    // Botão do carrinho vazio e do bloco de presente.
+    browseCta: 'Ver miniaturas',
   },
 
   highlights: {
@@ -73,7 +67,7 @@ export const content = {
       carrier: 'Transportadora',
       deliveryTime: 'Prazo de entrega',
       tracking: 'Rastreio',
-      freeShipping: 'Frete grátis',
+      freeShipping: 'Frete',
     },
   },
 

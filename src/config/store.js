@@ -7,7 +7,7 @@
  * Importante: este arquivo é lido também pelo Vite (vite.config.js) e pelos
  * testes, então ele NÃO pode usar nada do navegador (window, document...).
  *
- * Textos de seções (hero, destaques, presente etc.) ficam em ./content.js.
+ * Textos de seções (destaques, presente, envio etc.) ficam em ./content.js.
  * Páginas institucionais (privacidade, termos...) ficam em ./pages.js.
  * IDs de Pixel/Analytics ficam em ./analytics.js.
  * Produtos ficam em ../products/data/products.js.
@@ -96,21 +96,31 @@ export const storeConfig = {
   // ── ENVIO ────────────────────────────────────────────────────────────────
   shipping: {
     // TODO: configurar frete.
+    // Política atual: FRETE GRÁTIS A PARTIR DA 2ª UNIDADE. Com 1 só miniatura, frete fixo de R$ 5,90
+    // pelo Correios Mini (embalagem pequena, cabe no Mini Envios).
+    //
     // 'flat' = usa a tabela "options" abaixo, igual para todo o Brasil.
     // Para calcular por CEP (Correios, Melhor Envio, Frenet...), implemente o provedor
     // em src/services/shipping.js e troque este valor.
     provider: 'flat',
 
-    // Valores PROVISÓRIOS — confirme antes de publicar.
+    // Opções de entrega do checkout. O "price" é o valor cobrado quando NÃO há frete grátis.
+    // TODO: confirmar o prazo do Correios Mini (minDays/maxDays e info.deliveryTime abaixo são provisórios).
     options: [
-      { id: 'economico', name: 'Envio econômico', carrier: 'Correios (PAC)', price: 14.9, minDays: 5, maxDays: 10 },
-      { id: 'expresso', name: 'Envio expresso', carrier: 'Correios (SEDEX)', price: 24.9, minDays: 2, maxDays: 5 },
+      { id: 'correios-mini', name: 'Correios Mini', carrier: 'Correios (Mini Envios)', price: 5.9, minDays: 5, maxDays: 10 },
     ],
 
-    // Frete grátis: DESLIGADO até você definir a política.
-    // Ex.: { enabled: true, minOrderValue: 150 } → grátis acima de R$ 150,00 (valor após descontos).
+    // Frete grátis.
+    //  minUnits        → grátis a partir desta quantidade de miniaturas no pedido (2 = a partir da 2ª unidade).
+    //  countPromoUnits → true: a miniatura promocional de R$ 12,90 também conta como unidade para o frete
+    //                    (ela é uma miniatura enviada). Use false para contar só as regulares.
+    //  minOrderValue   → opcional: também libera o frete grátis por valor do pedido (ex.: 150 = R$ 150,00,
+    //                    já com descontos). null = não usar.
+    // A regra libera o frete grátis na opção mais barata. Para desligar tudo: enabled: false.
     freeShipping: {
-      enabled: false,
+      enabled: true,
+      minUnits: 2,
+      countPromoUnits: true,
       minOrderValue: null,
     },
 
@@ -118,8 +128,8 @@ export const storeConfig = {
     // Deixe um campo vazio ('') para ele não aparecer.
     info: {
       handlingTime: 'Até 2 dias úteis após a confirmação do pagamento', // prazo de postagem
-      carrier: 'Correios', // transportadora
-      deliveryTime: 'De 2 a 10 dias úteis, conforme a região', // prazo de entrega
+      carrier: 'Correios (Mini Envios)', // transportadora
+      deliveryTime: 'De 5 a 10 dias úteis, conforme a região', // prazo de entrega — TODO: confirmar
       tracking: 'Enviamos o código de rastreio por e-mail e WhatsApp assim que o pedido é postado', // rastreio
     },
   },

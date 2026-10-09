@@ -14,7 +14,7 @@ import { maskCep, maskCpf, maskPhone, onlyDigits } from '../utils/validators.js'
 import { session } from '../utils/storage.js';
 import { getUtm } from '../utils/utm.js';
 import { getProduct } from '../products/catalog.js';
-import { getShippingOptions, deliveryLabel } from '../services/shipping.js';
+import { getShippingOptions, estimateCartShipping, deliveryLabel } from '../services/shipping.js';
 import { lookupCep } from '../services/cep.js';
 import { createOrder } from '../services/payment.js';
 import { track } from '../services/analytics.js';
@@ -120,9 +120,10 @@ function mount(root) {
 
   // ── dados derivados ──────────────────────────────────────────────────────
   const selectedShipping = () => shippingOptions?.find((o) => o.id === form.shippingId) ?? null;
+  // Frete mostrado no resumo: a opção escolhida ou, antes disso, a estimativa da regra (grátis / fixo).
   const shippingSummary = () => {
     const s = selectedShipping();
-    return s ? { cents: s.price, free: Boolean(s.free) } : null;
+    return s ? { cents: s.price, free: Boolean(s.free) } : estimateCartShipping(cart.getState().totals);
   };
   const shippingLabel = () => {
     const s = selectedShipping();
@@ -131,7 +132,7 @@ function mount(root) {
   };
   const addressLine = () =>
     `${form.street}, ${form.noNumber ? 's/n' : form.number}${form.complement ? ` — ${form.complement}` : ''} — ${form.district}, ${form.city}/${form.state} — CEP ${form.cep}`;
-  const grandTotal = () => cart.getState().totals.total + (selectedShipping()?.price ?? 0);
+  const grandTotal = () => cart.getState().totals.total + (shippingSummary()?.cents ?? 0);
 
   // ── renderização ─────────────────────────────────────────────────────────
   function renderSummary() {
@@ -207,14 +208,16 @@ function mount(root) {
   }
 
   async function loadShipping() {
-    const { totals, lines } = cart.getState();
-    const key = `${onlyDigits(form.cep)}|${totals.total}|${storeConfig.shipping.provider}`;
+    const { totals } = cart.getState();
+    // O frete depende da quantidade (grátis a partir de 2 miniaturas), do valor e do CEP.
+    const key = [onlyDigits(form.cep), totals.total, totals.regularCount, totals.bumpCount, storeConfig.shipping.provider].join('|');
     if (shippingOptions && key === shippingKey) return;
     shippingOptions = null;
     shippingFailed = false;
     shippingKey = key;
     try {
-      const options = await getShippingOptions({ cep: onlyDigits(form.cep), goodsTotal: totals.total, items: lines });
+      const options = await getShippingOptions({ cep: onlyDigits(form.cep), totals, items: totals.lines });
+      if (key !== shippingKey) return; // o carrinho/CEP mudou durante a consulta
       shippingOptions = options;
       if (!options.some((o) => o.id === form.shippingId)) form.shippingId = options[0]?.id ?? '';
       persist();
@@ -348,7 +351,7 @@ function mount(root) {
         cep: onlyDigits(form.cep), street: form.street.trim(), number: form.noNumber ? 's/n' : form.number.trim(),
         complement: form.complement.trim(), district: form.district.trim(), city: form.city.trim(), state: form.state,
       },
-      shipping: { id: ship.id, name: ship.name, carrier: ship.carrier, price: ship.price },
+      shipping: { id: ship.id, name: ship.name, carrier: ship.carrier, price: ship.price, free: Boolean(ship.free) },
       paymentMethod: form.paymentMethod,
       items: totals.lines.map((l) => ({
         productId: l.productId, name: getProduct(l.productId).name, qty: l.qty, unitPrice: l.unitPrice, bump: l.bump,
@@ -363,6 +366,7 @@ function mount(root) {
 
   async function submitOrder() {
     if (submitting) return;
+    if (!selectedShipping()) return goStep(3); // o frete precisa ser recalculado (ex.: carrinho mudou)
     const { totals } = cart.getState();
     submitting = true;
     paymentError = '';
@@ -414,8 +418,9 @@ function mount(root) {
   };
   window.addEventListener('popstate', onPop);
   const unsubscribe = cart.subscribe(() => {
-    if (cartEmpty() && !order) render({ focus: false });
-    else renderSummary();
+    if (cartEmpty() && !order) return render({ focus: false });
+    if (shippingOptions || step >= 3) loadShipping(); // grátis/pago pode mudar com a quantidade
+    renderSummary();
   });
 
   // Dados de uma compra anterior: se o carrinho voltou a ter itens, o pedido antigo é descartado.

@@ -1,13 +1,13 @@
 /**
  * PÁGINA INICIAL — compra em poucos segundos:
- *   hero compacto → catálogo → destaques → avaliações → clientes → presente → envio → confiança
+ *   catálogo (logo no topo) → destaques → avaliações → clientes → presente → envio → confiança
  */
 
 import { html } from '../utils/html.js';
 import { reviews } from '../products/data/reviews.js';
 import * as cart from '../app/cart.js';
 import * as favorites from '../app/favorites.js';
-import { heroSection, catalogSection, mountCatalog } from '../components/Catalog.js';
+import { catalogSection, mountCatalog } from '../components/Catalog.js';
 import { syncCards, syncFavorites } from '../components/ProductCard.js';
 import { highlightsSection, customerGallerySection, giftSection, packagingSection, trustSection } from '../components/Sections.js';
 import { reviewsSection, mountReviews } from '../components/Reviews.js';
@@ -17,7 +17,6 @@ let activeCategory = 'todos';
 
 export default function HomePage() {
   const markup = html`
-    ${heroSection()}
     ${catalogSection(activeCategory)}
     ${highlightsSection()}
     ${reviewsSection({ list: reviews })}

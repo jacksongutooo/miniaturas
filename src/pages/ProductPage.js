@@ -12,6 +12,7 @@ import { getProductBySlug, getRelatedProducts } from '../products/catalog.js';
 import { reviews } from '../products/data/reviews.js';
 import { getMaxQty, isInStock, lowStockLabel } from '../services/inventory.js';
 import { track } from '../services/analytics.js';
+import { getShippingPolicyText } from '../services/shipping.js';
 import * as cart from '../app/cart.js';
 import * as favorites from '../app/favorites.js';
 import { hrefFor } from '../app/router.js';
@@ -49,6 +50,7 @@ export default function ProductPage({ slug }) {
   const reviewList = own.length >= 2 ? own : reviews;
 
   const addLabel = inStock ? 'Adicionar ao carrinho' : 'Esgotado';
+  const shippingPolicy = getShippingPolicyText();
 
   const markup = html`<div class="container pdp-wrap">
       <nav class="breadcrumb" aria-label="Você está em">
@@ -75,6 +77,16 @@ export default function ProductPage({ slug }) {
           </a>
 
           <p class="pdp__price">${moneyFromReais(product.price)}</p>
+
+          ${shippingPolicy.headline || shippingPolicy.detail
+            ? html`<div class="pdp__ship">
+                ${icon('truck', { size: 22 })}
+                <p>
+                  ${shippingPolicy.headline ? html`<strong>${shippingPolicy.headline}</strong>` : ''}
+                  ${shippingPolicy.detail ? html`<span>${shippingPolicy.detail}</span>` : ''}
+                </p>
+              </div>`
+            : ''}
 
           <div class="pdp__promo">
             <p class="pdp__promo-title">${icon('percent', { size: 16 })} Leve mais e economize — você pode combinar modelos diferentes</p>

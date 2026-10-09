@@ -6,7 +6,7 @@
  * profissional (jurídico/contábil) antes de publicar.
  *
  * Cada parágrafo é um item do array "body". Use { h: 'Subtítulo' } para subtítulos.
- * {storeName} é trocado automaticamente pelo nome da loja.
+ * {storeName} é trocado automaticamente pelo nome da loja e {shippingPolicy} pela regra de frete (config/store.js).
  */
 
 export const pages = {
@@ -52,7 +52,8 @@ export const pages = {
     title: 'Política de envio',
     // TODO: configurar frete e confirmar prazos.
     body: [
-      'Enviamos para todo o Brasil. Os prazos e valores de frete são exibidos no checkout.',
+      // {shippingPolicy} vira, automaticamente, a regra definida em config/store.js (ex.: "Frete grátis a partir de 2 miniaturas. ...").
+      'Enviamos para todo o Brasil. {shippingPolicy}',
       { h: 'Prazo de postagem' },
       'O pedido é preparado e postado após a confirmação do pagamento.',
       { h: 'Rastreamento' },

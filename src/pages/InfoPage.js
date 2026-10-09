@@ -9,8 +9,13 @@ import { html } from '../utils/html.js';
 import { hrefFor } from '../app/router.js';
 import NotFoundPage from './NotFoundPage.js';
 import { whatsappLink } from '../components/WhatsappButton.js';
+import { getShippingPolicyText } from '../services/shipping.js';
 
-const fill = (text) => text.replaceAll('{storeName}', storeConfig.name);
+const fill = (text) => {
+  const policy = getShippingPolicyText();
+  const shippingPolicy = [policy.headline, policy.detail].filter(Boolean).join('. ');
+  return text.replaceAll('{storeName}', storeConfig.name).replaceAll('{shippingPolicy}', shippingPolicy ? `${shippingPolicy}.` : 'Os valores e prazos de frete são exibidos no checkout.');
+};
 
 export default function InfoPage({ slug }) {
   const page = pages[slug];

@@ -7,7 +7,7 @@ import { content } from '../config/content.js';
 import { html } from '../utils/html.js';
 import { icon } from '../utils/icons.js';
 import { customerPhotos } from '../products/data/gallery.js';
-import { moneyFromReais } from '../utils/format.js';
+import { getShippingPolicyText } from '../services/shipping.js';
 import { img } from './primitives.js';
 
 /** "Detalhes que fazem a diferença" */
@@ -77,14 +77,16 @@ export function giftSection() {
 /** "Embalagem e envio" — valores configuráveis em storeConfig.shipping.info */
 export function packagingSection() {
   const p = content.packaging;
-  const { info, freeShipping } = storeConfig.shipping;
+  const { info } = storeConfig.shipping;
+  // Política de frete (ex.: "Frete grátis a partir de 2 miniaturas. Com 1 miniatura, frete fixo de R$ 5,90 (Correios Mini)").
+  const policy = getShippingPolicyText();
+  const shippingText = [policy.headline, policy.detail].filter(Boolean).join('. ');
   const rows = [
+    ['freeShipping', 'tag', shippingText ? `${shippingText}.` : ''],
     ['handlingTime', 'box', info.handlingTime],
     ['carrier', 'truck', info.carrier],
     ['deliveryTime', 'mapPin', info.deliveryTime],
     ['tracking', 'route', info.tracking],
-    // Só aparece quando a política de frete grátis for ligada na config.
-    ['freeShipping', 'tag', freeShipping.enabled && freeShipping.minOrderValue != null ? `Em pedidos a partir de ${moneyFromReais(freeShipping.minOrderValue)}` : ''],
   ].filter(([, , value]) => value);
 
   return html`<section class="section section--soft" aria-labelledby="packaging-title">

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { storeConfig } from '../src/config/store.js';
-import { computeTotals, discountPercentFor, nextTierFor, qualifiesForFreeShipping } from '../src/utils/pricing.js';
+import { computeTotals, discountPercentFor, nextTierFor } from '../src/utils/pricing.js';
 import { getDiscountProgress } from '../src/utils/discount.js';
 import { getProduct, getProducts } from '../src/products/catalog.js';
 import { money } from '../src/utils/format.js';
@@ -126,12 +126,6 @@ test('nós da barra: 1 → 2 → 3 → 4 → 5+ com 5% 10% 15% 20%', () => {
   assert.equal(getDiscountProgress(0, opts.rules).fill, 0);
   assert.equal(getDiscountProgress(3, opts.rules).fill, 0.5);
   assert.equal(getDiscountProgress(5, opts.rules).fill, 1);
-});
-
-test('frete grátis só existe quando ligado na config', () => {
-  assert.equal(qualifiesForFreeShipping(99999, storeConfig.shipping.freeShipping), false);
-  assert.equal(qualifiesForFreeShipping(15000, { enabled: true, minOrderValue: 150 }), true);
-  assert.equal(qualifiesForFreeShipping(14999, { enabled: true, minOrderValue: 150 }), false);
 });
 
 test('todos os produtos usam o preço central da config', () => {

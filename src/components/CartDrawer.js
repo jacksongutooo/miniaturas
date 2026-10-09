@@ -15,6 +15,7 @@ import { trapTab } from '../utils/focusTrap.js';
 import { getProduct, getProducts } from '../products/catalog.js';
 import { pickUpsellProducts } from '../products/upsell.js';
 import { getMaxQty } from '../services/inventory.js';
+import { estimateCartShipping, cartGrandTotal } from '../services/shipping.js';
 import { getPath, hrefFor, navigate } from '../app/router.js';
 import { pushOverlay, popOverlay } from '../app/overlays.js';
 import * as cart from '../app/cart.js';
@@ -22,6 +23,7 @@ import { img, cartStepper } from './primitives.js';
 import { hideToast } from './Toast.js';
 import { discountProgress } from './DiscountProgress.js';
 import { summaryRows } from './CartSummary.js';
+import { freeShippingChip, offerShippingNotice } from './ShippingNotice.js';
 
 let root; // .drawer
 let panel;
@@ -91,7 +93,7 @@ function emptyMarkup() {
     <span class="drawer__empty-icon">${icon('cart', { size: 34 })}</span>
     <p class="drawer__empty-title">Seu carrinho está vazio</p>
     <p class="muted">Escolha suas miniaturas favoritas e ganhe desconto progressivo.</p>
-    <button type="button" class="btn btn--primary" data-action="browse">${content.hero.cta}</button>
+    <button type="button" class="btn btn--primary" data-action="browse">${content.catalog.browseCta}</button>
   </div>`;
 }
 
@@ -152,12 +154,15 @@ function render() {
       .map((p) => ({ p, added: lines.some((l) => l.bump && l.productId === p.id) }))
       .filter(({ added }) => added || canAdd);
     const hasBump = totals.bumpCount > 0;
+    const estimate = estimateCartShipping(totals);
 
-    body.innerHTML = String(html`<ul class="offer-list">${visible.map(({ p, added }) => offerCard(p, added))}</ul>
+    body.innerHTML = String(html`${offerShippingNotice(totals)}
+      <ul class="offer-list">${visible.map(({ p, added }) => offerCard(p, added))}</ul>
       ${hasBump ? html`<p class="offer-note">A miniatura promocional tem preço fixo e não entra na contagem do desconto progressivo.</p>` : ''}`);
     foot.hidden = false;
     foot.innerHTML = String(html`
-      <div class="offer-total"><span>Total do pedido</span><strong>${money(totals.total)}</strong></div>
+      <div class="offer-total"><span>Total do pedido</span><strong>${money(cartGrandTotal(totals))}</strong></div>
+      ${estimate ? html`<p class="offer-total__note">${estimate.free ? 'Frete grátis' : `Inclui frete de ${money(estimate.cents)}`}</p>` : ''}
       ${hasBump
         ? html`<button type="button" class="btn btn--primary btn--lg btn--block" data-action="offer-continue">Continuar para o checkout</button>`
         : html`<button type="button" class="link-btn link-btn--muted" data-action="offer-skip">Não, quero continuar</button>`}
@@ -170,14 +175,15 @@ function render() {
     foot.hidden = true;
   } else {
     pin.hidden = false;
-    pin.innerHTML = String(discountProgress(totals));
+    pin.innerHTML = String(html`${discountProgress(totals)}${freeShippingChip(totals)}`);
     animateProgress();
     body.innerHTML = String(html`<ul class="lines">${cart.getDetailedLines().map(lineMarkup)}</ul>`);
     foot.hidden = false;
+    const estimate = estimateCartShipping(totals);
     foot.innerHTML = String(html`
-      ${summaryRows(totals)}
+      ${summaryRows(totals, { shipping: estimate, showShipping: true })}
       <button type="button" class="btn btn--primary btn--lg btn--block" data-action="checkout">Finalizar compra</button>
-      <p class="drawer__fine">Frete e pagamento na próxima etapa.</p>
+      <p class="drawer__fine">${estimate ? 'Pagamento na próxima etapa.' : 'Frete e pagamento na próxima etapa.'}</p>
     `);
   }
 

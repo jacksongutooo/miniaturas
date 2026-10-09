@@ -7,6 +7,8 @@ import { html } from '../utils/html.js';
 import { icon } from '../utils/icons.js';
 import { money, plural } from '../utils/format.js';
 import { nextTierFor } from '../utils/pricing.js';
+import { getFreeShippingStatus } from '../utils/freeShipping.js';
+import { cartGrandTotal } from '../services/shipping.js';
 import { storeConfig } from '../config/store.js';
 import * as cart from '../app/cart.js';
 
@@ -28,10 +30,21 @@ export function mountCartBar(container) {
       totals.discountPercent > 0
         ? html`${plural(totals.itemCount, 'item', 'itens')} • <span class="cartbar__off">${totals.discountPercent}% OFF</span>`
         : html`${plural(totals.itemCount, 'item', 'itens')}`;
-    const sub =
-      totals.discountPercent === 0 && next
-        ? `Leve +${next.at - totals.regularCount} e ganhe ${next.percent}% OFF`
-        : `Total ${money(totals.total)}`;
+    // Linha de baixo: o próximo benefício (desconto e/ou frete grátis) ou o total a pagar.
+    const ship = getFreeShippingStatus(totals, storeConfig.shipping.freeShipping);
+    const shipMissing = ship.enabled && !ship.qualifies ? ship.missing : 0;
+    let sub;
+    if (totals.discountPercent === 0 && next) {
+      const missing = next.at - totals.regularCount;
+      sub =
+        shipMissing === missing
+          ? `Leve +${missing}: ${next.percent}% OFF e frete grátis`
+          : `Leve +${missing} e ganhe ${next.percent}% OFF`;
+    } else if (shipMissing > 0) {
+      sub = `Leve +${shipMissing} e ganhe frete grátis`;
+    } else {
+      sub = `Total ${money(cartGrandTotal(totals))}`;
+    }
 
     el.innerHTML = String(html`
       <button type="button" class="cartbar__info" data-action="open-cart" aria-label="Abrir carrinho: ${plural(totals.itemCount, 'item', 'itens')}">

@@ -1,46 +1,6 @@
-/* HERO COMPACTO + CATEGORIAS + GRADE E CARD DE PRODUTO */
+/* CATEGORIAS + GRADE E CARD DE PRODUTO (+ faixas de desconto usadas na página do produto) */
 
-/* ── Hero (compacto: o cliente vê os produtos logo) ──────────────────────── */
-
-.hero {
-  padding: 14px 0 0;
-}
-.hero__card {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-soft);
-}
-.hero__title {
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  font-weight: 800;
-}
-.hero__price {
-  color: var(--accent);
-  white-space: nowrap;
-}
-.hero__text {
-  margin-top: 6px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--text-2);
-}
-.hero__cta {
-  margin-top: 12px;
-  min-height: 44px;
-}
-.hero__note {
-  margin-top: 6px;
-  text-align: center;
-  font-size: 12.5px;
-  color: var(--text-2);
-}
-
-/* Faixas do desconto progressivo (hero e página do produto) */
+/* Faixas do desconto progressivo (página do produto) */
 .tiers {
   display: grid;
   grid-auto-flow: column;
@@ -73,25 +33,6 @@
 }
 
 @media (min-width: 640px) {
-  .hero {
-    padding-top: 24px;
-  }
-  .hero__card {
-    gap: 22px;
-    padding: 28px 32px;
-  }
-  .hero__title {
-    font-size: 32px;
-  }
-  .hero__text {
-    font-size: 16px;
-    margin-top: 10px;
-    max-width: 46ch;
-  }
-  .hero__cta {
-    margin-top: 18px;
-    min-height: 50px;
-  }
   .tiers {
     gap: 10px;
   }
@@ -104,21 +45,6 @@
   }
   .tiers__pct {
     font-size: 17px;
-  }
-  .hero__note {
-    margin-top: 12px;
-    font-size: 14px;
-  }
-}
-@media (min-width: 900px) {
-  .hero__card {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    align-items: center;
-    gap: 40px;
-    padding: 32px 40px;
-  }
-  .hero__title {
-    font-size: 34px;
   }
 }
 

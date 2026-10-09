@@ -356,6 +356,20 @@
   padding: 0 16px;
 }
 
+/* Telas muito estreitas: sem o ícone, sobra espaço para a mensagem. */
+@media (max-width: 359px) {
+  .cartbar__icon {
+    display: none;
+  }
+  .cartbar__cta {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .cartbar__text small {
+    white-space: normal; /* a mensagem pode ocupar 2 linhas em vez de ser cortada */
+  }
+}
+
 body.is-drawer-open .cartbar,
 body[data-route='product'] .cartbar,
 body[data-layout='checkout'] .cartbar {

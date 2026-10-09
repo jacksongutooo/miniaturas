@@ -4,7 +4,7 @@
  *   Subtotal            R$ 71,60
  *   Desconto 15%       -R$ 10,74
  *   Miniatura promocional R$ 12,90
- *   Frete               R$ 14,90   (somente no checkout)
+ *   Frete               R$ 5,90  ou  Grátis (a partir de 2 miniaturas)
  *   Economia            R$ 15,74
  *   Total               R$ 73,76
  */
@@ -29,7 +29,7 @@ export function summaryRows(totals, { shipping = null, showShipping = false } = 
       ? html`<div class="summary__row"><dt>Miniatura promocional</dt><dd>${money(totals.bumpTotal)}</dd></div>`
       : ''}
     ${showShipping
-      ? html`<div class="summary__row"><dt>Frete</dt><dd>${shipping ? (shipping.free ? 'Grátis' : money(shipping.cents)) : html`<span class="muted">${shipping === null ? 'A calcular' : ''}</span>`}</dd></div>`
+      ? html`<div class="summary__row${shipping?.free ? ' summary__row--free' : ''}"><dt>Frete</dt><dd>${shipping ? (shipping.free ? 'Grátis' : money(shipping.cents)) : html`<span class="muted">A calcular</span>`}</dd></div>`
       : ''}
     ${totals.savings > 0
       ? html`<div class="summary__row summary__row--savings"><dt>Economia</dt><dd>${money(totals.savings)}</dd></div>`
