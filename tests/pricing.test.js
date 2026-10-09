@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { storeConfig } from '../src/config/store.js';
 import { computeTotals, discountPercentFor, nextTierFor } from '../src/utils/pricing.js';
 import { getDiscountProgress } from '../src/utils/discount.js';
-import { getProduct, getProducts } from '../src/products/catalog.js';
 import { money } from '../src/utils/format.js';
+import { getProduct } from './fixtures.js';
 
 const opts = {
   getProduct,
@@ -37,7 +37,7 @@ test('1 miniatura: sem desconto', () => {
 });
 
 test('modelos diferentes se combinam: 3 itens = 10% OFF', () => {
-  // 1 São Bento + 1 Nossa Senhora Aparecida + 1 São Jorge
+  // 3 modelos diferentes, 1 de cada
   const t = computeTotals([reg(2), reg(1), reg(3)], opts);
   assert.equal(t.regularCount, 3);
   assert.equal(t.discountPercent, 10);
@@ -128,6 +128,28 @@ test('nós da barra: 1 → 2 → 3 → 4 → 5+ com 5% 10% 15% 20%', () => {
   assert.equal(getDiscountProgress(5, opts.rules).fill, 1);
 });
 
-test('todos os produtos usam o preço central da config', () => {
-  for (const p of getProducts()) assert.equal(p.price, storeConfig.productPrice);
+test('conjunto de R$ 43,90 + miniaturas: o desconto vale sobre o subtotal, contando 1 unidade por item', () => {
+  // 17,90 + 43,90 = 61,80 · 2 unidades → 5% = 3,09 · total 58,71
+  const two = computeTotals([reg(1), reg(9)], opts);
+  assert.equal(brl(two.subtotal), 'R$ 61,80');
+  assert.equal(two.regularCount, 2);
+  assert.equal(two.discountPercent, 5);
+  assert.equal(brl(two.discount), 'R$ 3,09');
+  assert.equal(brl(two.total), 'R$ 58,71');
+
+  // 17,90 + 17,90 + 43,90 = 79,70 · 3 unidades → 10% = 7,97 · total 71,73
+  const three = computeTotals([reg(1), reg(2), reg(9)], opts);
+  assert.equal(brl(three.subtotal), 'R$ 79,70');
+  assert.equal(three.discountPercent, 10);
+  assert.equal(brl(three.total), 'R$ 71,73');
+});
+
+test('o conjunto sozinho não recebe desconto e a oferta de R$ 12,90 segue valendo só o preço fixo', () => {
+  const alone = computeTotals([reg(9)], opts);
+  assert.equal(alone.discountPercent, 0);
+  assert.equal(brl(alone.total), 'R$ 43,90');
+
+  const withBump = computeTotals([reg(9), bump(1)], opts);
+  assert.equal(withBump.discountPercent, 0);
+  assert.equal(brl(withBump.total), 'R$ 56,80'); // 43,90 + 12,90
 });

@@ -1,17 +1,13 @@
 /**
  * CATÁLOGO DE PRODUTOS — único lugar onde os modelos são cadastrados.
  * ----------------------------------------------------------------------------
- * Esta lista tem duas partes:
- *   1. MODELOS REAIS — com as fotos enviadas (padronizadas por scripts/preparar-fotos.py).
- *   2. MODELOS PROVISÓRIOS — só para testar o layout, com foto-modelo cinza. Apague-os
- *      (ou troque por modelos reais) quando quiser.
+ * TODO: adicionar os demais modelos. (já pedidos: Frei Gilson, Santa Teresinha, São Bento,
+ *       Kit Jesus e Maria, Kit Natalino — faltam preço e fotos; veja fotos-originais/LEIA-ME.md)
+ * TODO: confirmar tamanhos.        (height / width — vieram dos anúncios; weight/material/finish ficam em branco)
+ * TODO: adicionar avaliações reais. (rating / reviewsCount são de EXEMPLO, exceto os do Jesus Sentado,
+ *                                   que vieram do anúncio do TikTok Shop)
  *
- * TODO: adicionar modelos reais.   (nomes, categorias, descrições — hoje: nomes do anúncio de referência)
- * TODO: adicionar fotos reais.     (os modelos reais usam /images/<slug>-1..3.jpg; as fotos vieram de
- *                                   capturas de tela — o ideal é substituir por fotos da peça que você envia)
- * TODO: confirmar tamanhos.        (height / width / weight — medidas vieram do anúncio de referência)
- * TODO: confirmar materiais.       (material / finish — deixados em branco nos modelos reais)
- * TODO: adicionar avaliações reais. (rating / reviewsCount abaixo são de exemplo)
+ * As fotos de cada modelo são geradas por scripts/preparar-fotos.py (capa, outra foto e medidas).
  *
  * Como adicionar um modelo: copie um bloco, mude id/slug/name e as fotos. É só isso.
  * O restante do site (catálogo, busca, página do produto, carrinho, sugestões da
@@ -21,7 +17,9 @@
  *   id, slug         identificadores (slug aparece na URL: #/produto/<slug>)
  *   name             nome exibido
  *   category         uma das categorias de ./categories.js (campo "match")
- *   price            preço regular — vem de storeConfig.productPrice (R$ 17,90)
+ *   price            preço regular. Se omitido, vale storeConfig.productPrice (R$ 17,90). Conjuntos podem ter
+ *                    preço próprio (ex.: Sagrada Família, R$ 43,90) — e, por custarem mais que a miniatura
+ *                    padrão, nunca são oferecidos a R$ 12,90 (ver src/products/upsell.js).
  *   rating           nota média (0–5) e reviewsCount: quantidade de avaliações
  *   images           de 1 a 6 fotos (a primeira é a capa). Proporção quadrada (1:1) recomendada.
  *   description      texto da página do produto
@@ -29,10 +27,11 @@
  *   featured         true = aparece primeiro na vitrine
  *   bestSeller       true = entra na categoria "Mais vendidos" (+ selo no card)
  *   sales            nº de vendas — usado para ordenar "Mais vendidos" e sugerir na oferta
- *   stock            unidades em estoque (0 = esgotado). TODO: ligar a um backend de estoque
+ *   stock            unidades em estoque (0 = esgotado → o card mostra "Esgotado"; abaixo de 5, a página
+ *                    mostra "Restam apenas N unidades"). TODO: ligar a um backend de estoque
  *                    (ver src/services/inventory.js)
  *   related          ids de modelos complementares — priorizados na oferta de R$ 12,90
- *   upsellEligible   false = nunca sugerir este modelo na oferta (usado nos provisórios)
+ *   upsellEligible   false = nunca sugerir este modelo na oferta de R$ 12,90
  */
 
 import { storeConfig } from '../../config/store.js';
@@ -52,18 +51,20 @@ const defaults = {
     'Miniatura com acabamento detalhado, ideal para decoração, presente ou espaço de devoção.',
 };
 
-// Ficha técnica dos modelos reais: só o que veio do anúncio de referência (o resto fica em branco).
+// Ficha técnica: só o que veio dos anúncios (o resto fica em branco até ser confirmado).
 const semFichaExtra = { width: null, weight: null, material: null, finish: null };
 
 const list = [
-  // ── MODELOS REAIS ─────────────────────────────────────────────────────────
   {
     id: 5,
     slug: 'jesus-sentado',
     name: 'Jesus Sentado',
     category: 'Jesus',
-    rating: 4.9,
-    reviewsCount: 52,
+    // Números reais do anúncio no TikTok Shop (captura de 09/10/2026): 4,2 ★ (44 avaliações), 550 vendidos.
+    rating: 4.2,
+    reviewsCount: 44,
+    sales: 550,
+    bestSeller: true,
     images: ['/images/jesus-sentado-1.jpg', '/images/jesus-sentado-2.jpg', '/images/jesus-sentado-3.jpg'],
     ...semFichaExtra,
     height: '5 cm',
@@ -106,9 +107,10 @@ const list = [
     images: ['/images/sagrada-familia-1.jpg', '/images/sagrada-familia-2.jpg', '/images/sagrada-familia-3.jpg'],
     ...semFichaExtra,
     height: '5 cm',
-    // TODO: confirmar se é um conjunto com as 3 peças (Jesus, Maria e José) e o preço do conjunto.
+    // Conjunto com as 3 peças (José, Jesus e Maria). Preço próprio: R$ 43,90.
+    price: 43.9,
     description:
-      'Sagrada Família em miniatura, com Jesus, Maria e José. Acabamento colorido, ideal para decoração, presente ou espaço de devoção.',
+      'Conjunto com as três peças da Sagrada Família — José, Jesus e Maria —, coloridas e cheias de detalhes, com 5 cm de altura cada uma. Ideal para decoração, presente ou espaço de devoção.',
     featured: true,
     related: [5, 9, 11],
   },
@@ -147,96 +149,6 @@ const list = [
       'Boneco de neve articulado: as pernas se movimentam e podem ficar em diferentes posições. Decoração de Natal para mesas, prateleiras e estantes.',
     featured: true,
     related: [10, 5, 9],
-  },
-
-  // ── MODELOS PROVISÓRIOS (só para testar o layout; foto-modelo cinza) ──────
-  {
-    id: 1,
-    slug: 'nossa-senhora-aparecida',
-    name: 'Nossa Senhora Aparecida',
-    category: 'Nossa Senhora',
-    rating: 4.9,
-    reviewsCount: 123,
-    images: [
-      '/images/produto-01-1.jpg',
-      '/images/produto-01-2.jpg',
-      '/images/produto-01-3.jpg',
-      '/images/produto-01-4.jpg',
-      '/images/produto-01-5.jpg',
-      '/images/produto-01-6.jpg',
-    ],
-    bestSeller: true,
-    sales: 482,
-    related: [6, 9, 4],
-    upsellEligible: false,
-  },
-  {
-    id: 2,
-    slug: 'sao-bento',
-    name: 'São Bento',
-    category: 'Santos',
-    rating: 4.8,
-    reviewsCount: 96,
-    images: ['/images/produto-02-1.jpg', '/images/produto-02-2.jpg', '/images/produto-02-3.jpg', '/images/produto-02-4.jpg'],
-    bestSeller: true,
-    sales: 431,
-    related: [3, 8, 7],
-    upsellEligible: false,
-  },
-  {
-    id: 3,
-    slug: 'sao-jorge',
-    name: 'São Jorge',
-    category: 'Santos',
-    rating: 4.9,
-    reviewsCount: 88,
-    images: ['/images/produto-03-1.jpg', '/images/produto-03-2.jpg', '/images/produto-03-3.jpg', '/images/produto-03-4.jpg', '/images/produto-03-5.jpg'],
-    bestSeller: true,
-    sales: 377,
-    related: [2, 8, 12],
-    upsellEligible: false,
-  },
-  {
-    // Exemplo de modelo ESGOTADO (stock: 0): aparece no catálogo, mas não pode ser comprado
-    // nem é sugerido na oferta. Troque o stock para testar.
-    id: 6,
-    slug: 'nossa-senhora-de-fatima',
-    name: 'Nossa Senhora de Fátima',
-    category: 'Nossa Senhora',
-    rating: 4.7,
-    reviewsCount: 58,
-    images: ['/images/produto-06-1.jpg', '/images/produto-06-2.jpg', '/images/produto-06-3.jpg', '/images/produto-06-4.jpg'],
-    sales: 187,
-    stock: 0,
-    related: [1, 9, 7],
-    upsellEligible: false,
-  },
-  {
-    // Exemplo de ESTOQUE BAIXO (aparece "Restam apenas 4 unidades" na página do produto).
-    id: 7,
-    slug: 'santo-antonio',
-    name: 'Santo Antônio',
-    category: 'Santos',
-    rating: 4.8,
-    reviewsCount: 52,
-    images: ['/images/produto-07-1.jpg', '/images/produto-07-2.jpg', '/images/produto-07-3.jpg', '/images/produto-07-4.jpg'],
-    sales: 164,
-    stock: 4,
-    related: [12, 2, 6],
-    upsellEligible: false,
-  },
-  {
-    id: 8,
-    slug: 'sao-miguel-arcanjo',
-    name: 'São Miguel Arcanjo',
-    category: 'Santos',
-    rating: 4.9,
-    reviewsCount: 79,
-    images: ['/images/produto-08-1.jpg', '/images/produto-08-2.jpg', '/images/produto-08-3.jpg', '/images/produto-08-4.jpg'],
-    bestSeller: true,
-    sales: 256,
-    related: [3, 2, 10],
-    upsellEligible: false,
   },
 ];
 

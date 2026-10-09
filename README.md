@@ -28,7 +28,7 @@ Publicação: qualquer hospedagem estática (Vercel, Netlify, Cloudflare Pages, 
 | WhatsApp (número e mensagem), e-mail/horário de atendimento | `src/config/store.js` → `whatsapp`, `support` |
 | Frete: valor de 1 unidade (R$ 5,90), a partir de quantas unidades é grátis (2), prazos, transportadora | `src/config/store.js` → `shipping` (`options`, `freeShipping`, `info`) |
 | CNPJ, razão social, endereço (rodapé) | `src/config/store.js` → `company` |
-| Produtos (nomes, fotos, medidas, material, estoque…) | `src/products/data/products.js` |
+| Produtos (nomes, fotos, medidas, preço próprio de conjuntos, estoque…) | `src/products/data/products.js` |
 | Categorias | `src/products/data/categories.js` |
 | Avaliações | `src/products/data/reviews.js` |
 | Fotos de clientes ("Veja como elas ficam") | `src/products/data/gallery.js` |
@@ -41,13 +41,9 @@ Para ver tudo que ainda é provisório: `grep -rn "TODO" src public index.html`.
 
 ### Fotos
 
-**Os 6 modelos reais** (Jesus Sentado, Maria Sentada, São José Sentado, Sagrada Família, Divino Espírito Santo e Boneco de Neve Articulado) já têm 3 fotos padronizadas cada (900 × 900 px, JPG leve, sem dados de localização):
+Os **6 modelos** (Jesus Sentado, Maria Sentada, São José Sentado, Sagrada Família, Divino Espírito Santo e Boneco de Neve Articulado) têm 3 fotos padronizadas cada (900 × 900 px, JPG leve, sem dados de localização): a **foto de estúdio** (fundo removido, peça centralizada, off-white suave e sombra de contato), a **cena original** (com o ambiente que ela tem, recortada em quadrado) e a de **medidas** (altura/largura desenhadas sobre a peça).
 
-| Arquivo | O que é |
-|---|---|
-| `public/images/<modelo>-1.jpg` | **foto de estúdio**: fundo removido, peça centralizada, fundo off-white suave e sombra de contato |
-| `public/images/<modelo>-2.jpg` | a **cena original**, recortada em quadrado |
-| `public/images/<modelo>-3.jpg` | **medidas** (altura/largura) desenhadas sobre a peça |
+A **capa** (`<modelo>-1.jpg`, a primeira foto da página) é a **cena** quando a foto original tem ambiente (Sagrada Família, Divino Espírito Santo e Boneco de Neve) e o **estúdio** quando o fundo é liso (Jesus, Maria e São José, fotografados diante de uma tela branca). A ordem fica sempre: capa `cena` → `-1` cena · `-2` estúdio · `-3` medidas; capa `estudio` → `-1` estúdio · `-2` cena · `-3` medidas.
 
 Elas são geradas por `scripts/preparar-fotos.py` a partir das fotos guardadas em `fotos-originais/` (uma pasta por modelo; veja o `LEIA-ME.md` dela). Para refazer ou acrescentar fotos, sem enviar nada para serviços externos:
 
@@ -56,15 +52,16 @@ python3 -m venv .venv-fotos
 .venv-fotos/bin/pip install -r scripts/requirements-fotos.txt
 .venv-fotos/bin/python scripts/preparar-fotos.py                      # todos os modelos
 .venv-fotos/bin/python scripts/preparar-fotos.py jesus-sentado        # só um
-.venv-fotos/bin/python scripts/preparar-fotos.py --fundo branco       # fundo branco puro (padrão: estúdio)
+.venv-fotos/bin/python scripts/preparar-fotos.py --fundo branco       # fundo branco puro nas fotos de estúdio (padrão: estúdio)
+.venv-fotos/bin/python scripts/preparar-fotos.py --capa estudio       # força a capa de estúdio em todos
 ```
 
-> **Qualidade:** as fotos recebidas eram **capturas de tela de celular (~739 px)**, então o recorte e a nitidez têm limite. Quando houver as fotos originais da câmera (ou as imagens do anúncio, em tamanho cheio), é só colocá-las em `fotos-originais/` e rodar o script de novo — o resultado melhora sozinho.
+> **Qualidade:** as fotos recebidas eram **capturas de tela de celular (~739 px)**, então o recorte e a nitidez têm limite. Quando houver as fotos originais (ou as imagens dos anúncios, em tamanho cheio), é só colocá-las em `fotos-originais/` e rodar o script de novo — o resultado melhora sozinho.
 
-Os **modelos provisórios** (ids 1, 2, 3, 6, 7 e 8) usam placeholders cinza com o nome do arquivo. As demais imagens também são provisórias; substitua mantendo o mesmo nome, ou altere os caminhos em `products.js`:
+Não há mais modelos de teste no catálogo. Continuam provisórias (placeholders cinza) as imagens da galeria de clientes, das avaliações, da embalagem/presente/compartilhamento e o logo; substitua mantendo o mesmo nome, ou altere os caminhos em `products.js`/`gallery.js`:
 
 ```
-public/images/produto-01-1.jpg … produto-01-6.jpg   (até 6 fotos por produto; a 1ª é a capa)
+public/images/<modelo>-1.jpg … <modelo>-6.jpg        (até 6 fotos por produto; a 1ª é a capa)
 public/images/clientes/cliente-01.jpg …              (galeria "Veja como elas ficam")
 public/images/avaliacoes/avaliacao-01.jpg …          (fotos nas avaliações)
 public/images/embalagem.jpg · presente.jpg · compartilhamento.jpg (1200×630)
@@ -75,10 +72,10 @@ Recomendação: fotos **quadradas (1:1)**, ~800–1000 px, JPG/WebP otimizados (
 
 ### Adicionar um produto
 
-1. Ponha a foto em `fotos-originais/<slug>/cena.jpeg` e acrescente uma linha em `PRODUTOS` no `scripts/preparar-fotos.py` (slug e medidas); rode o script. *(Se já tiver as fotos prontas, pule este passo e copie-as para `public/images/`.)*
-2. Copie um bloco em `products.js` e mude `id`, `slug`, `name`, `category` e `images`. Catálogo, busca, página do produto, relacionados e sugestões da oferta passam a incluí-lo automaticamente.
+1. Ponha a foto em `fotos-originais/<slug>/cena.jpeg` e acrescente uma linha em `PRODUTOS` no `scripts/preparar-fotos.py` (slug, medidas e capa); rode o script. *(Se já tiver as fotos prontas, pule este passo e copie-as para `public/images/`.)*
+2. Copie um bloco em `products.js` e mude `id`, `slug`, `name`, `category` e `images`. Catálogo, busca, página do produto, relacionados e sugestões da oferta passam a incluí-lo automaticamente. Os chips de categoria só aparecem quando a categoria tem produto.
 
-Exemplos prontos no arquivo (modelos provisórios): **Nossa Senhora de Fátima** (`stock: 0` → "Esgotado") e **Santo Antônio** (`stock: 4` → "Restam apenas 4 unidades"). Os modelos provisórios têm `upsellEligible: false`, para a oferta de R$ 12,90 só sugerir modelos reais.
+Detalhes úteis: `stock: 0` mostra "Esgotado" e bloqueia a compra (e a oferta de R$ 12,90 nunca o sugere); `stock` de 1 a 4 mostra "Restam apenas N unidades". Conjuntos podem ter **preço próprio** (`price: 43.9`, como a Sagrada Família): por custarem mais que a miniatura padrão, **nunca** entram na oferta de R$ 12,90.
 
 ---
 
@@ -86,10 +83,11 @@ Exemplos prontos no arquivo (modelos provisórios): **Nossa Senhora de Fátima**
 
 - **Desconto progressivo** pela quantidade de miniaturas **regulares** no carrinho (modelos diferentes se combinam): 2 → 5%, 3 → 10%, 4 → 15%, 5+ → 20%. Aplicado automaticamente; a barra de progresso e as mensagens ("Você desbloqueou 5% OFF 🎉", "Falta apenas 1…") são geradas a partir de `discountRules`.
 - **Miniatura promocional (R$ 12,90)** é marcada internamente com `bump: true`: **não conta** para o desconto e **não recebe** desconto. Limite por pedido: `upsellLimit` (1). Só existe se houver ao menos 1 miniatura regular no carrinho.
-- **Sugestões da oferta**: nunca repetem o que já está no carrinho; só modelos em estoque; prioriza complementares (`related` no produto) → mais vendidos → destaques, evitando repetir categoria.
+- **Sugestões da oferta**: nunca repetem o que já está no carrinho; só modelos em estoque **e de preço padrão** (conjuntos mais caros, como a Sagrada Família de R$ 43,90, nunca saem por R$ 12,90 — nem pela tela, nem por carrinho salvo); prioriza complementares (`related` no produto) → mais vendidos → destaques, evitando repetir categoria.
 - Exemplo do briefing (testado): 3 normais = R$ 53,70 → 10% → **R$ 48,33** + promocional R$ 12,90 = **R$ 61,23**. 4 normais = R$ 71,60 − R$ 10,74 = **R$ 60,86**.
 - **Frete**: **grátis a partir da 2ª unidade** (2 miniaturas, de modelos iguais ou diferentes). Com **1 miniatura**, frete fixo de **R$ 5,90** pelo **Correios Mini** (Mini Envios). A miniatura promocional de R$ 12,90 também conta como unidade para o frete (`freeShipping.countPromoUnits`; ponha `false` para contar só as regulares) — por isso a oferta "libera" o frete grátis de quem tem 1 item e isso é avisado na etapa "Antes de finalizar...". Dá para mudar a quantidade (`minUnits`), liberar também por valor do pedido (`minOrderValue`) ou desligar (`enabled: false`).
 - Exemplos (testados): 1 × R$ 17,90 + frete R$ 5,90 = **R$ 23,80** · 2 × R$ 17,90 − 5% = **R$ 34,01 com frete grátis** · 1 + promocional = R$ 30,80 com frete grátis.
+- **Conjunto (Sagrada Família, R$ 43,90)**: conta como **1 unidade** no desconto e no frete. Sozinho: R$ 43,90 + frete R$ 5,90. Com 1 miniatura de R$ 17,90: R$ 61,80 − 5% (R$ 3,09) = **R$ 58,71 com frete grátis**. Para liberar o frete grátis só pelo valor (ex.: a partir de R$ 40), use `freeShipping.minOrderValue`.
 - Valores são calculados em **centavos** (sem erro de arredondamento). Lógica pura em `src/utils/pricing.js`, `src/utils/discount.js` e `src/utils/freeShipping.js`.
 - O carrinho fica no `localStorage` (ids + quantidades; os preços sempre vêm da config atual). Sincroniza entre abas.
 
@@ -126,7 +124,7 @@ src/
 public/        favicon.svg · images/
 scripts/       preparar-fotos.py (tira o fundo e padroniza as fotos) · requirements-fotos.txt
 fotos-originais/  fotos recebidas, uma pasta por modelo (+ LEIA-ME.md; não vão para o site)
-tests/         pricing.test.js · shipping.test.js · catalog.test.js
+tests/         pricing · shipping · catalog · cart (.test.js) · fixtures.js (catálogo de teste)
 ```
 
 ## Acessibilidade e responsividade

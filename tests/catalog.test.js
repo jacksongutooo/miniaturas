@@ -3,17 +3,29 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { getProducts, getCategories, searchProducts, filterByCategory, getRelatedProducts, getProduct } from '../src/products/catalog.js';
-import { pickUpsellProducts } from '../src/products/upsell.js';
+import { storeConfig } from '../src/config/store.js';
+import {
+  getProducts,
+  getCategories,
+  getVisibleCategories,
+  searchProducts,
+  filterByCategory,
+  getRelatedProducts,
+  getProduct,
+  getProductBySlug,
+} from '../src/products/catalog.js';
+import { pickUpsellProducts, isUpsellEligible } from '../src/products/upsell.js';
 import { reviews } from '../src/products/data/reviews.js';
 
 const all = getProducts();
 const reg = (productId) => ({ productId, qty: 1, bump: false });
-// Modelos que a oferta de R$ 12,90 pode sugerir (em estoque e não marcados como provisórios).
-const eligible = all.filter((p) => p.upsellEligible !== false && p.stock > 0);
+const bySlug = (slug) => getProductBySlug(slug);
+// Modelos que a oferta de R$ 12,90 pode sugerir (o conjunto de R$ 43,90 fica de fora).
+const eligible = all.filter(isUpsellEligible);
 const publicFile = (path) => fileURLToPath(new URL(`../public${path}`, import.meta.url));
 
 test('catálogo: slugs e ids únicos, categorias existentes', () => {
+  assert.ok(all.length >= 1);
   assert.equal(new Set(all.map((p) => p.slug)).size, all.length);
   assert.equal(new Set(all.map((p) => p.id)).size, all.length);
   const matches = new Set(getCategories().filter((c) => c.type === 'category').map((c) => c.match));
@@ -32,33 +44,55 @@ test('toda avaliação aponta para um produto que existe', () => {
   for (const r of reviews) assert.ok(slugs.has(r.product), `avaliação ${r.id} ligada a "${r.product}", que não existe`);
 });
 
-test('os modelos reais vêm primeiro na vitrine', () => {
-  const featured = filterByCategory('todos').filter((p) => p.featured);
+test('modelos relacionados existem e não apontam para si mesmos', () => {
+  const ids = new Set(all.map((p) => p.id));
+  for (const p of all) {
+    for (const id of p.related ?? []) {
+      assert.ok(ids.has(id), `${p.name}: relacionado ${id} não existe`);
+      assert.notEqual(id, p.id, `${p.name}: relacionado a si mesmo`);
+    }
+  }
+});
+
+test('preços: o padrão da config, exceto os conjuntos com preço próprio', () => {
+  const ownPrice = { 'sagrada-familia': 43.9 };
+  for (const p of all) assert.equal(p.price, ownPrice[p.slug] ?? storeConfig.productPrice, `${p.name}: preço inesperado`);
+  assert.equal(bySlug('sagrada-familia').price, 43.9);
+});
+
+test('vitrine: destaques primeiro, na ordem do cadastro', () => {
+  const featured = all.filter((p) => p.featured);
   assert.ok(featured.length >= 1);
-  const firstIds = filterByCategory('todos').slice(0, featured.length).map((p) => p.id);
-  assert.deepEqual(firstIds, featured.map((p) => p.id));
+  const shown = filterByCategory('todos');
+  assert.deepEqual(shown.slice(0, featured.length).map((p) => p.id), featured.map((p) => p.id));
+  assert.equal(shown.length, all.length);
 });
 
 test('busca por nome ignora acento e maiúsculas', () => {
   const names = (q) => searchProducts(q).map((p) => p.name);
-  assert.ok(names('São').includes('São Bento'));
-  assert.ok(names('sao').includes('São Jorge'));
-  assert.ok(names('SAO').includes('São Miguel Arcanjo'));
-  assert.ok(names('sao').includes('São José Sentado'));
-  assert.deepEqual(names('fatima'), ['Nossa Senhora de Fátima']);
-  assert.ok(names('espirito').includes('Divino Espírito Santo'));
+  assert.deepEqual(names('São'), ['São José Sentado']);
+  assert.deepEqual(names('sao'), ['São José Sentado']);
+  assert.deepEqual(names('SAO'), ['São José Sentado']);
+  assert.deepEqual(names('espirito'), ['Divino Espírito Santo']);
+  assert.deepEqual(names('JESUS'), ['Jesus Sentado']);
+  assert.equal(names('sentad').length, 3); // Jesus, Maria e São José sentados
+  assert.deepEqual(names('natal'), ['Boneco de Neve Articulado']); // pela categoria, com menos peso
   assert.deepEqual(names('xyzzy'), []);
   assert.deepEqual(names('   '), []);
 });
 
 test('busca com vários termos exige todos', () => {
-  assert.deepEqual(searchProducts('sao bento').map((p) => p.slug), ['sao-bento']);
-  assert.ok(searchProducts('nossa senhora').length >= 3);
+  assert.deepEqual(searchProducts('jose sentado').map((p) => p.slug), ['sao-jose-sentado']);
+  assert.deepEqual(searchProducts('boneco neve').map((p) => p.slug), ['boneco-de-neve-articulado']);
+  assert.deepEqual(searchProducts('maria jesus'), []);
 });
 
 test('categorias', () => {
   assert.equal(filterByCategory('todos').length, all.length);
-  assert.ok(filterByCategory('santos').every((p) => p.category === 'Santos'));
+  assert.deepEqual(filterByCategory('santos').map((p) => p.slug), ['sao-jose-sentado']);
+  assert.deepEqual(filterByCategory('nossa-senhora').map((p) => p.slug), ['maria-sentada']);
+  assert.deepEqual(filterByCategory('jesus').map((p) => p.slug), ['jesus-sentado']);
+  assert.deepEqual(filterByCategory('familia').map((p) => p.slug), ['sagrada-familia']);
   assert.deepEqual(filterByCategory('natal').map((p) => p.slug), ['boneco-de-neve-articulado']);
   assert.deepEqual(filterByCategory('espirito-santo').map((p) => p.slug), ['divino-espirito-santo']);
   const best = filterByCategory('mais-vendidos');
@@ -69,6 +103,33 @@ test('categorias', () => {
   );
 });
 
+test('chips: só aparecem categorias com produtos ("Todos" sempre fica)', () => {
+  const visible = getVisibleCategories();
+  assert.equal(visible[0].id, 'todos');
+  for (const c of visible) assert.ok(c.type === 'all' || filterByCategory(c.id).length > 0, `chip vazio: ${c.label}`);
+  for (const c of getCategories()) {
+    if (filterByCategory(c.id).length > 0) assert.ok(visible.some((v) => v.id === c.id), `faltou o chip ${c.label}`);
+  }
+});
+
+test('oferta: o conjunto de R$ 43,90 nunca é elegível; as miniaturas padrão são', () => {
+  const sagrada = bySlug('sagrada-familia');
+  assert.equal(isUpsellEligible(sagrada), false);
+  assert.ok(!eligible.includes(sagrada));
+  for (const p of all.filter((x) => x.slug !== 'sagrada-familia')) assert.ok(isUpsellEligible(p), `${p.name} deveria ser elegível`);
+});
+
+test('oferta: critérios de elegibilidade (estoque, preço, marcação)', () => {
+  const base = { id: 99, stock: 5, price: storeConfig.productPrice };
+  assert.equal(isUpsellEligible(base), true);
+  assert.equal(isUpsellEligible({ ...base, stock: 0 }), false); // esgotado
+  assert.equal(isUpsellEligible({ ...base, upsellEligible: false }), false); // marcado pelo dono
+  assert.equal(isUpsellEligible({ ...base, price: 43.9 }), false); // mais caro que a miniatura padrão
+  assert.equal(isUpsellEligible({ ...base, price: storeConfig.upsellPrice }), false); // não seria desconto
+  assert.equal(isUpsellEligible({ ...base, price: 14.9 }), true); // mais barato, ainda acima da oferta
+  assert.equal(isUpsellEligible(undefined), false);
+});
+
 test('oferta: nunca sugere o que já está no carrinho', () => {
   const inCart = eligible.slice(0, 2);
   const picks = pickUpsellProducts(inCart.map((p) => reg(p.id)), all, 3);
@@ -76,16 +137,17 @@ test('oferta: nunca sugere o que já está no carrinho', () => {
   for (const p of picks) assert.ok(!inCart.some((c) => c.id === p.id), `sugeriu ${p.name}, que já está no carrinho`);
 });
 
-test('oferta: só modelos em estoque e elegíveis; prioriza complementares', () => {
-  const base = eligible[0];
-  const picks = pickUpsellProducts([reg(base.id)], all, 3);
+test('oferta: só modelos elegíveis (nunca o conjunto); prioriza complementares', () => {
+  const base = bySlug('jesus-sentado');
+  const picks = pickUpsellProducts([reg(base.id)], all, 4);
   assert.ok(picks.length > 0);
-  assert.ok(picks.every((p) => p.stock > 0 && p.upsellEligible !== false), 'sugeriu esgotado ou provisório');
+  assert.ok(picks.every(isUpsellEligible), 'sugeriu modelo não elegível');
+  assert.ok(picks.every((p) => p.slug !== 'sagrada-familia'), 'sugeriu o conjunto a R$ 12,90');
   assert.ok(base.related.some((id) => picks.some((p) => p.id === id)), 'nenhum complementar entre as sugestões');
 });
 
 test('oferta: modelo esgotado nunca é sugerido, mesmo sendo complementar', () => {
-  const base = eligible[0];
+  const base = bySlug('jesus-sentado');
   const soldOutId = base.related.find((id) => eligible.some((p) => p.id === id));
   const catalog = all.map((p) => (p.id === soldOutId ? { ...p, stock: 0 } : p));
   const picks = pickUpsellProducts([reg(base.id)], catalog, 4);
@@ -103,7 +165,8 @@ test('oferta: respeita o item promocional já adicionado', () => {
 });
 
 test('relacionados não incluem o próprio produto', () => {
-  const rel = getRelatedProducts(getProduct(1), 4);
+  const jesus = bySlug('jesus-sentado');
+  const rel = getRelatedProducts(getProduct(jesus.id), 4);
   assert.equal(rel.length, 4);
-  assert.ok(rel.every((p) => p.id !== 1));
+  assert.ok(rel.every((p) => p.id !== jesus.id));
 });

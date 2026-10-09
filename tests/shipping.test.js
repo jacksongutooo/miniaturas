@@ -5,8 +5,8 @@ import { storeConfig } from '../src/config/store.js';
 import { computeTotals, qualifiesForFreeShipping, freeShippingUnlockedByBump, shippingUnits } from '../src/utils/pricing.js';
 import { getFreeShippingStatus, describeShippingPolicy } from '../src/utils/freeShipping.js';
 import { getShippingOptions, estimateCartShipping, cartGrandTotal, getShippingPolicyText } from '../src/services/shipping.js';
-import { getProduct } from '../src/products/catalog.js';
 import { money } from '../src/utils/format.js';
+import { getProduct } from './fixtures.js';
 
 const opts = { getProduct, rules: storeConfig.discountRules, upsellPrice: storeConfig.upsellPrice };
 const totalsOf = (lines) => computeTotals(lines, opts);
@@ -69,6 +69,14 @@ test('a miniatura promocional conta como unidade para o frete (countPromoUnits)'
   const onlyRegular = { ...fs, countPromoUnits: false };
   assert.equal(shippingUnits(t, onlyRegular), 1);
   assert.equal(qualifiesForFreeShipping(t, onlyRegular), false);
+});
+
+test('um conjunto (R$ 43,90) conta como 1 unidade: paga o frete, a menos que um valor mínimo libere', () => {
+  const t = totalsOf([reg(9)]);
+  assert.equal(shippingUnits(t, fs), 1);
+  assert.equal(qualifiesForFreeShipping(t, fs), false);
+  assert.deepEqual(estimateCartShipping(t), { cents: 590, free: false });
+  assert.equal(qualifiesForFreeShipping(t, { ...fs, minOrderValue: 40 }), true); // se um dia quiser liberar por valor
 });
 
 test('regras alternativas: por valor, desligado', () => {

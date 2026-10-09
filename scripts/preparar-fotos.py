@@ -6,9 +6,16 @@ PREPARAR FOTOS DOS PRODUTOS
 Pega as fotos de  fotos-originais/<produto>/cena.jpeg  e gera, em public/images/,
 as imagens padronizadas que o site usa (900×900, JPG leve, sem dados de localização):
 
-    <produto>-1.jpg   foto de estúdio: fundo removido, peça centralizada, sombra suave
-    <produto>-2.jpg   a cena original (foto recortada em quadrado)
-    <produto>-3.jpg   imagem de medidas (altura/largura) desenhada sobre a peça
+    foto de estúdio   fundo removido, peça centralizada, sombra suave
+    cena              a foto original, com o ambiente que ela tem (recortada em quadrado)
+    medidas           altura/largura desenhadas sobre a peça
+
+A CAPA (<produto>-1.jpg, a primeira foto da página) é a cena quando a foto original tem um
+ambiente bonito (mesa, enfeites, luzes) e o estúdio quando o fundo é liso. Isso se escolhe por
+produto em PRODUTOS ('capa': 'cena' ou 'estudio'). A ordem fica sempre:
+
+    capa 'estudio':   -1 estúdio · -2 cena   · -3 medidas
+    capa 'cena':      -1 cena    · -2 estúdio · -3 medidas
 
 Capturas de tela de celular (com barra de status e faixas pretas) são recortadas
 automaticamente para ficar só a foto.
@@ -18,13 +25,14 @@ COMO USAR
     .venv-fotos/bin/pip install -r scripts/requirements-fotos.txt
     .venv-fotos/bin/python scripts/preparar-fotos.py              # todos os produtos
     .venv-fotos/bin/python scripts/preparar-fotos.py jesus-sentado   # só um
-    .venv-fotos/bin/python scripts/preparar-fotos.py --fundo branco  # fundo branco puro
+    .venv-fotos/bin/python scripts/preparar-fotos.py --fundo branco  # fundo branco puro (só nas fotos de estúdio)
+    .venv-fotos/bin/python scripts/preparar-fotos.py --capa estudio  # força a capa de estúdio em todos
 
 (Na primeira execução o modelo de recorte, ~170 MB, é baixado automaticamente.)
 
 PARA ADICIONAR UM PRODUTO
     1. Coloque a foto em  fotos-originais/<slug>/cena.jpeg  (jpg, png, webp ou heic).
-    2. Acrescente uma linha em PRODUTOS abaixo (slug, medidas).
+    2. Acrescente uma linha em PRODUTOS abaixo (slug, medidas, capa).
     3. Rode o script e use  /images/<slug>-1.jpg, -2, -3  em src/products/data/products.js.
 
 DICAS DE QUALIDADE
@@ -56,15 +64,19 @@ ORIGINAIS = RAIZ / 'fotos-originais'
 SAIDA = RAIZ / 'public' / 'images'
 
 # ── PRODUTOS ────────────────────────────────────────────────────────────────
-# slug → arquivo da foto + medidas (em cm) para a imagem "-3".
-# TODO: confirmar tamanhos reais (os valores abaixo vieram do anúncio de referência).
+# slug → arquivo da foto, medidas (em cm) para a imagem de medidas e qual foto é a capa.
+#   capa: 'cena'    → a foto original (com o ambiente dela) é a primeira da página
+#         'estudio' → a primeira é a foto de estúdio (padrão; use quando o fundo da foto é liso/branco)
+# TODO: confirmar tamanhos reais (os valores abaixo vieram dos anúncios).
 PRODUTOS = {
-    'jesus-sentado': {'foto': 'jesus-sentado/cena.jpeg', 'altura_cm': 5},
-    'maria-sentada': {'foto': 'maria-sentada/cena.jpeg', 'altura_cm': 5},
-    'sao-jose-sentado': {'foto': 'sao-jose-sentado/cena.jpeg', 'altura_cm': 5},
-    'sagrada-familia': {'foto': 'sagrada-familia/cena-escritorio.jpeg', 'altura_cm': 5},
-    'divino-espirito-santo': {'foto': 'espirito-santo/cena.jpeg', 'altura_cm': 10, 'largura_cm': 10},
-    'boneco-de-neve-articulado': {'foto': 'boneco-de-neve/cena.jpeg', 'altura_cm': 6, 'largura_cm': 4},
+    # Jesus, Maria e José: o fundo original é uma tela de computador branca → capa de estúdio.
+    'jesus-sentado': {'foto': 'jesus-sentado/cena.jpeg', 'altura_cm': 5, 'capa': 'estudio'},
+    'maria-sentada': {'foto': 'maria-sentada/cena.jpeg', 'altura_cm': 5, 'capa': 'estudio'},
+    'sao-jose-sentado': {'foto': 'sao-jose-sentado/cena.jpeg', 'altura_cm': 5, 'capa': 'estudio'},
+    # Estes três têm um ambiente de verdade (escritório, mesa com vela, enfeites de Natal) → ficam como capa.
+    'sagrada-familia': {'foto': 'sagrada-familia/cena-escritorio.jpeg', 'altura_cm': 5, 'capa': 'cena'},
+    'divino-espirito-santo': {'foto': 'espirito-santo/cena.jpeg', 'altura_cm': 10, 'largura_cm': 10, 'capa': 'cena'},
+    'boneco-de-neve-articulado': {'foto': 'boneco-de-neve/cena.jpeg', 'altura_cm': 6, 'largura_cm': 4, 'capa': 'cena'},
 }
 
 # ── APARÊNCIA ───────────────────────────────────────────────────────────────
@@ -239,6 +251,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description='Padroniza as fotos dos produtos para o site.')
     ap.add_argument('produtos', nargs='*', help='slugs a processar (padrão: todos)')
     ap.add_argument('--fundo', choices=sorted(FUNDOS), default='estudio', help='cor do fundo (padrão: estudio = off-white com degradê)')
+    ap.add_argument('--capa', choices=['estudio', 'cena'], help='força a capa de todos os produtos (padrão: a de cada um em PRODUTOS)')
     ap.add_argument('--modelo', default='u2net', help='modelo de recorte do rembg (padrão: u2net)')
     args = ap.parse_args()
 
@@ -259,11 +272,14 @@ def main() -> int:
             continue
         foto = extrair_foto_da_captura(abrir(origem))
         recorte = recortar_fundo(foto, sessao)
-        salvar(imagem_estudio(recorte, args.fundo), SAIDA / f'{slug}-1.jpg')
-        salvar(imagem_cena(foto), SAIDA / f'{slug}-2.jpg')
+        capa = args.capa or cfg.get('capa', 'estudio')
+        estudio, cena = imagem_estudio(recorte, args.fundo), imagem_cena(foto)
+        primeira, segunda = (cena, estudio) if capa == 'cena' else (estudio, cena)
+        salvar(primeira, SAIDA / f'{slug}-1.jpg')
+        salvar(segunda, SAIDA / f'{slug}-2.jpg')
         salvar(imagem_medidas(recorte, args.fundo, cfg.get('altura_cm'), cfg.get('largura_cm')), SAIDA / f'{slug}-3.jpg')
         tamanhos = ', '.join(f'{(SAIDA / f"{slug}-{n}.jpg").stat().st_size // 1024} KB' for n in (1, 2, 3))
-        print(f'[{slug}] ok — {foto.width}×{foto.height}px de origem → 3 imagens ({tamanhos})')
+        print(f'[{slug}] ok — {foto.width}×{foto.height}px de origem → 3 imagens, capa = {capa} ({tamanhos})')
     return 0
 
 

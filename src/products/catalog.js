@@ -32,6 +32,10 @@ export function filterByCategory(categoryId) {
   return defaultOrder(products);
 }
 
+/** Categorias que têm ao menos um produto (chip vazio não aparece; "Todos" sempre fica). */
+export const getVisibleCategories = () =>
+  categories.filter((c) => c.type === 'all' || filterByCategory(c.id).length > 0);
+
 /**
  * Busca pelo nome (sem acento e sem diferenciar maiúsculas): "sao" encontra "São Bento".
  * Todos os termos digitados precisam aparecer. Também considera a categoria, com menos peso.

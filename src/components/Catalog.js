@@ -6,12 +6,12 @@
 import { content } from '../config/content.js';
 import { html } from '../utils/html.js';
 import { plural } from '../utils/format.js';
-import { filterByCategory, getCategories } from '../products/catalog.js';
+import { filterByCategory, getVisibleCategories } from '../products/catalog.js';
 import { productGrid } from './ProductCard.js';
 
 export function categoryChips(activeId) {
   return html`<div class="chips" role="group" aria-label="Categorias">
-    ${getCategories().map(
+    ${getVisibleCategories().map(
       (c) => html`<button type="button" class="chip${c.id === activeId ? ' is-active' : ''}" data-category="${c.id}" aria-pressed="${c.id === activeId}">${c.label}</button>`,
     )}
   </div>`;

@@ -14,6 +14,7 @@
 
 import { storeConfig } from '../config/store.js';
 import { getProduct } from '../products/catalog.js';
+import { isUpsellEligible } from '../products/upsell.js';
 import { getMaxQty } from '../services/inventory.js';
 import { track } from '../services/analytics.js';
 import { computeTotals } from '../utils/pricing.js';
@@ -39,6 +40,7 @@ function normalize(list) {
     const bump = Boolean(raw.bump);
     const key = `${bump ? 'b' : 'r'}:${product.id}`;
     if (seen.has(key)) continue;
+    if (bump && !isUpsellEligible(product)) continue; // p.ex. conjunto mais caro: nunca a R$ 12,90
     const max = bump ? 1 : getMaxQty(product);
     const qty = Math.min(Math.max(1, Math.floor(Number(raw.qty) || 1)), bump ? 1 : max);
     if (max <= 0) continue; // esgotado
@@ -151,6 +153,7 @@ export function addBump(productId) {
   const product = getProduct(productId);
   if (!product) return { ok: false, reason: 'unknown' };
   if (getMaxQty(product) <= 0) return { ok: false, reason: 'soldout' };
+  if (!isUpsellEligible(product)) return { ok: false, reason: 'ineligible' };
   if (totals.regularCount === 0) return { ok: false, reason: 'no-regular' };
   if (bumpUnits() >= storeConfig.upsellLimit) return { ok: false, reason: 'limit' };
   if (hasProduct(productId)) return { ok: false, reason: 'in-cart' };

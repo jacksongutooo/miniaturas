@@ -3,12 +3,28 @@
  * ----------------------------------------------------------------------------
  * Regras:
  *  • NUNCA sugere um modelo que já está no carrinho (regular ou promocional).
- *  • Só sugere modelos em estoque.
+ *  • Só sugere modelos que podem sair pelo preço da oferta (ver isUpsellEligible).
  *  • Prioridade: complementares ("related" do produto) → mais vendidos → destaques.
  *  • Evita mostrar vários modelos da mesma categoria quando há alternativas.
  */
 
+import { storeConfig } from '../config/store.js';
 import { isInStock } from '../services/inventory.js';
+import { toCents } from '../utils/format.js';
+
+/**
+ * Este modelo pode ser vendido pelo preço da oferta (R$ 12,90)?
+ *  • precisa estar em estoque e não ter `upsellEligible: false` em products.js;
+ *  • o preço regular precisa ser maior que o da oferta (senão não seria desconto) e NÃO
+ *    pode passar do preço padrão da miniatura: conjuntos/kits mais caros (ex.: a Sagrada
+ *    Família, R$ 43,90) nunca saem por R$ 12,90.
+ * Usada para escolher as sugestões e também para recusar a adição ao carrinho.
+ */
+export function isUpsellEligible(product) {
+  if (!product || !isInStock(product) || product.upsellEligible === false) return false;
+  const price = toCents(product.price);
+  return price > toCents(storeConfig.upsellPrice) && price <= toCents(storeConfig.productPrice);
+}
 
 /**
  * @param {Array<{productId:number}>} cartLines  itens do carrinho
@@ -21,7 +37,7 @@ export function pickUpsellProducts(cartLines, products, count = 3) {
   const maxSales = Math.max(1, ...products.map((p) => p.sales ?? 0));
 
   const candidates = products
-    .filter((p) => !inCart.has(p.id) && isInStock(p) && p.upsellEligible !== false)
+    .filter((p) => !inCart.has(p.id) && isUpsellEligible(p))
     .map((p) => {
       // Quantos itens do carrinho listam este modelo como complementar (ou o contrário).
       const relatedHits = cartProducts.filter(

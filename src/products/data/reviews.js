@@ -22,7 +22,7 @@ export const reviews = [
     rating: 5,
     date: '2026-09-28',
     text: 'Chegou bem embalada e o acabamento é muito bonito. Combinou direitinho com a estante da sala.',
-    product: 'nossa-senhora-aparecida',
+    product: 'maria-sentada',
     photos: ['/images/avaliacoes/avaliacao-01.jpg', '/images/avaliacoes/avaliacao-02.jpg'],
   },
   {
@@ -31,7 +31,7 @@ export const reviews = [
     rating: 5,
     date: '2026-09-25',
     text: 'Comprei três para dar de presente e já ganhei o desconto automático. Todas vieram iguais às fotos.',
-    product: 'sao-bento',
+    product: 'sao-jose-sentado',
     photos: ['/images/avaliacoes/avaliacao-03.jpg'],
   },
   {
@@ -40,7 +40,7 @@ export const reviews = [
     rating: 5,
     date: '2026-09-19',
     text: 'Os detalhes da pintura são ótimos, ainda mais pelo preço. A entrega foi dentro do prazo.',
-    product: 'sao-jorge',
+    product: 'jesus-sentado',
     photos: [],
   },
   {
@@ -67,7 +67,7 @@ export const reviews = [
     rating: 5,
     date: '2026-09-02',
     text: 'Embalagem muito bem protegida, nada quebrou no transporte. Recomendo.',
-    product: 'nossa-senhora-de-fatima',
+    product: 'sagrada-familia',
     photos: ['/images/avaliacoes/avaliacao-05.jpg', '/images/avaliacoes/avaliacao-06.jpg'],
   },
   {
@@ -76,7 +76,7 @@ export const reviews = [
     rating: 5,
     date: '2026-08-27',
     text: 'Comprei para a minha mãe e ela adorou o presente. Veio bem acabado.',
-    product: 'santo-antonio',
+    product: 'maria-sentada',
     photos: [],
   },
   {
@@ -85,7 +85,7 @@ export const reviews = [
     rating: 4,
     date: '2026-08-21',
     text: 'Gostei bastante. O código de rastreio chegou no mesmo dia da postagem.',
-    product: 'sao-miguel-arcanjo',
+    product: 'sao-jose-sentado',
     photos: [],
   },
   {
@@ -121,7 +121,7 @@ export const reviews = [
     rating: 5,
     date: '2026-07-22',
     text: 'Já é a segunda compra. Gosto de poder combinar modelos diferentes no mesmo pedido.',
-    product: 'sao-bento',
+    product: 'jesus-sentado',
     photos: ['/images/avaliacoes/avaliacao-08.jpg'],
   },
 ];
