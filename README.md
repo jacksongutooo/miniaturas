@@ -102,7 +102,7 @@ Só avaliações **reais**, copiadas dos anúncios do TikTok Shop (prints em `fo
 
 ## Fluxo de compra
 
-Vitrine (os produtos já aparecem no topo, sem banner) → **Adicionar** (aviso com quanto falta para o próximo desconto e para o frete grátis; barra fixa no celular) → carrinho lateral/tela cheia com barra de progresso, aviso de frete grátis e o frete já somado ao total → **Finalizar compra** → **"Antes de finalizar..."** (oferta de R$ 12,90; "Não, quero continuar") → checkout: Dados → Endereço (CEP preenche via ViaCEP) → Entrega → Pagamento → Confirmação. Não há cadastro obrigatório. O botão "voltar" do celular fecha o carrinho/galeria e navega entre as etapas do checkout.
+Vitrine (os produtos já aparecem no topo, sem banner) → **Adicionar** (aviso com quanto falta para o próximo desconto e para o frete grátis; barra fixa no celular) → carrinho lateral/tela cheia (barra de progresso e aviso de frete grátis, os itens, os detalhes de valores no fim da lista e, sempre à vista embaixo, o total com o frete já somado e o botão **Finalizar compra**; no canto, o link **Limpar carrinho**, com **Desfazer**) → **"Antes de finalizar..."** (oferta de R$ 12,90; "Não, quero continuar") → checkout: Dados → Endereço (CEP preenche via ViaCEP) → Entrega → Pagamento → Confirmação. Não há cadastro obrigatório. O botão "voltar" do celular fecha o carrinho/galeria e navega entre as etapas do checkout.
 
 ## O que ainda falta ligar (de propósito)
 

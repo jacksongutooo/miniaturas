@@ -6,7 +6,7 @@ import { on } from './actions.js';
 import * as cart from './cart.js';
 import * as favorites from './favorites.js';
 import { addToCart, browseCatalog } from './shopping.js';
-import { openCart, closeCart, startCheckout, offerActions } from '../components/CartDrawer.js';
+import { openCart, closeCart, startCheckout, offerActions, clearCart, undoClearCart } from '../components/CartDrawer.js';
 import { openLightboxFromElement } from '../components/Lightbox.js';
 import { showToast } from '../components/Toast.js';
 import { getProduct } from '../products/catalog.js';
@@ -30,6 +30,8 @@ export function registerHandlers() {
     else cart.decrement(el.dataset.key);
   });
   on('cart-remove', (el) => cart.remove(el.dataset.key));
+  on('cart-clear', () => clearCart());
+  on('cart-undo-clear', () => undoClearCart());
   on('open-cart', () => openCart());
   on('close-cart', () => closeCart());
   on('checkout', () => startCheckout());

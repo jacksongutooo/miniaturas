@@ -2,7 +2,9 @@
  * CARRINHO LATERAL (desktop) / TELA CHEIA (celular)  +  ETAPA "ANTES DE FINALIZAR..."
  * ----------------------------------------------------------------------------
  * Duas visões dentro da mesma gaveta, sem trocar de página:
- *   'cart'  → itens, barra de progresso do desconto, resumo e "Finalizar compra"
+ *   'cart'  → barra de progresso do desconto, itens e detalhes de valores (tudo na área que rola);
+ *             fixo embaixo: só o total e "Finalizar compra" — assim a lista de itens ganha espaço
+ *             mesmo em celulares pequenos
  *   'offer' → oferta complementar (miniatura de R$ 12,90) antes de ir ao checkout
  */
 
@@ -28,13 +30,13 @@ import { freeShippingChip, offerShippingNotice } from './ShippingNotice.js';
 let root; // .drawer
 let panel;
 let head;
-let pin;
 let body;
 let foot;
 let isOpen = false;
 let view = 'cart';
 let offerIds = [];
 let dismissedAtCount = -1; // quantidade regular em que o cliente recusou a oferta
+let clearedSnapshot = null; // itens do carrinho antes de "Limpar carrinho" (para o "Desfazer")
 let lastFocus = null;
 let hideTimer;
 let lastFill = 0; // para animar a barra de progresso entre renderizações
@@ -83,16 +85,21 @@ function headMarkup(totals) {
   return html`
     <div class="drawer__titles">
       <h2 id="drawer-title" class="drawer__title">Seu carrinho</h2>
-      <p class="drawer__sub">${plural(totals.itemCount, 'miniatura', 'miniaturas')}</p>
+      <p class="drawer__sub">${plural(totals.itemCount, 'miniatura', 'miniaturas')}${totals.itemCount > 0
+        ? html` <span aria-hidden="true">·</span> <button type="button" class="drawer__clear" data-action="cart-clear" aria-label="Limpar carrinho: remover todos os itens">Limpar carrinho</button>`
+        : ''}</p>
     </div>
     <button type="button" class="icon-btn" data-action="close-cart" aria-label="Fechar carrinho">${icon('close', { size: 22 })}</button>`;
 }
 
-function emptyMarkup() {
+function emptyMarkup(canUndo = false) {
   return html`<div class="drawer__empty">
     <span class="drawer__empty-icon">${icon('cart', { size: 34 })}</span>
     <p class="drawer__empty-title">Seu carrinho está vazio</p>
     <p class="muted">Escolha suas miniaturas favoritas e ganhe desconto progressivo.</p>
+    ${canUndo
+      ? html`<p class="drawer__undo" role="status">Carrinho limpo. <button type="button" class="link-btn" data-action="cart-undo-clear">Desfazer</button></p>`
+      : ''}
     <button type="button" class="btn btn--primary" data-action="browse">${content.catalog.browseCta}</button>
   </div>`;
 }
@@ -117,7 +124,7 @@ function offerCard(product, bumpInCart) {
 
 /** A barra é recriada a cada renderização; parte do valor anterior para a transição aparecer. */
 function animateProgress() {
-  const bar = pin.querySelector('.progress');
+  const bar = body.querySelector('.progress');
   if (!bar) return;
   const target = Number(bar.style.getPropertyValue('--fill')) || 0;
   if (!isOpen || target === lastFill) {
@@ -135,6 +142,7 @@ function render() {
 
   // Carrinho esvaziado enquanto estava na oferta → volta para o carrinho.
   if (totals.itemCount === 0 && view === 'offer') view = 'cart';
+  if (totals.itemCount > 0) clearedSnapshot = null; // voltou a ter itens: o "Desfazer" não vale mais
 
   const scrollTop = body.scrollTop;
   const active = document.activeElement;
@@ -145,8 +153,6 @@ function render() {
   head.innerHTML = String(headMarkup(totals));
 
   if (view === 'offer') {
-    pin.innerHTML = '';
-    pin.hidden = true;
     const canAdd = cart.canAddBump();
     const visible = offerIds
       .map((id) => getProduct(id))
@@ -168,22 +174,24 @@ function render() {
         : html`<button type="button" class="link-btn link-btn--muted" data-action="offer-skip">Não, quero continuar</button>`}
     `);
   } else if (totals.itemCount === 0) {
-    pin.innerHTML = '';
-    pin.hidden = true;
-    body.innerHTML = String(emptyMarkup());
+    body.innerHTML = String(emptyMarkup(Boolean(clearedSnapshot)));
     foot.innerHTML = '';
     foot.hidden = true;
   } else {
-    pin.hidden = false;
-    pin.innerHTML = String(html`${discountProgress(totals)}${freeShippingChip(totals)}`);
-    animateProgress();
-    body.innerHTML = String(html`<ul class="lines">${cart.getDetailedLines().map(lineMarkup)}</ul>`);
-    foot.hidden = false;
     const estimate = estimateCartShipping(totals);
+    body.innerHTML = String(html`
+      <div class="drawer__pin">${discountProgress(totals)}${freeShippingChip(totals)}</div>
+      <ul class="lines">${cart.getDetailedLines().map(lineMarkup)}</ul>
+      <div class="drawer__details">
+        ${summaryRows(totals, { shipping: estimate, showShipping: true, showTotal: false })}
+        <p class="drawer__fine">${estimate ? 'Pagamento na próxima etapa.' : 'Frete e pagamento na próxima etapa.'}</p>
+      </div>`);
+    animateProgress();
+    foot.hidden = false;
     foot.innerHTML = String(html`
-      ${summaryRows(totals, { shipping: estimate, showShipping: true })}
+      <div class="drawer__total"><span>Total</span><strong>${money(cartGrandTotal(totals))}</strong></div>
+      ${totals.savings > 0 ? html`<p class="drawer__savings">Você economiza ${money(totals.savings)}</p>` : ''}
       <button type="button" class="btn btn--primary btn--lg btn--block" data-action="checkout">Finalizar compra</button>
-      <p class="drawer__fine">${estimate ? 'Pagamento na próxima etapa.' : 'Frete e pagamento na próxima etapa.'}</p>
     `);
   }
 
@@ -206,6 +214,7 @@ function show() {
 function hide() {
   if (!isOpen) return;
   isOpen = false;
+  clearedSnapshot = null;
   root.classList.remove('is-open');
   root.setAttribute('aria-hidden', 'true');
   document.documentElement.classList.remove('no-scroll');
@@ -263,6 +272,22 @@ export function startCheckout() {
   panel.focus({ preventScroll: true });
 }
 
+// ── limpar carrinho (com "Desfazer") ─────────────────────────────────────────
+
+export function clearCart() {
+  const { lines } = cart.getState();
+  if (!lines.length) return;
+  clearedSnapshot = lines.map((l) => ({ productId: l.productId, qty: l.qty, bump: l.bump }));
+  dismissedAtCount = -1; // carrinho novo: a oferta volta a poder aparecer
+  cart.clear();
+}
+
+export function undoClearCart() {
+  const snapshot = clearedSnapshot;
+  clearedSnapshot = null;
+  if (snapshot) cart.restore(snapshot);
+}
+
 export const offerActions = {
   back() {
     view = 'cart';
@@ -295,7 +320,6 @@ export function mountCartDrawer(container) {
     <div class="drawer__backdrop" data-action="close-cart"></div>
     <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1">
       <header class="drawer__head"></header>
-      <div class="drawer__pin" hidden></div>
       <div class="drawer__body"></div>
       <footer class="drawer__foot" hidden></footer>
     </section>`;
@@ -303,7 +327,6 @@ export function mountCartDrawer(container) {
 
   panel = root.querySelector('.drawer__panel');
   head = root.querySelector('.drawer__head');
-  pin = root.querySelector('.drawer__pin');
   body = root.querySelector('.drawer__body');
   foot = root.querySelector('.drawer__foot');
 

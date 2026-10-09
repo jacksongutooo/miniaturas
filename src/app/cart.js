@@ -189,6 +189,11 @@ export function clear() {
   commit([]);
 }
 
+/** Recoloca linhas guardadas (ex.: "Desfazer" depois de limpar o carrinho); as regras de consistência valem de novo. */
+export function restore(list) {
+  commit(list);
+}
+
 /** Linhas prontas para exibir: junta produto + preços calculados. */
 export function getDetailedLines() {
   return totals.lines.map((l) => ({ ...l, product: getProduct(l.productId) }));

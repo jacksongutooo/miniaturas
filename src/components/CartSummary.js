@@ -14,9 +14,9 @@ import { money } from '../utils/format.js';
 
 /**
  * @param {object} totals  resultado de computeTotals (centavos)
- * @param {{ shipping?: {label:string, cents:number|null, free?:boolean}|null, showShipping?: boolean }} opts
+ * @param {{ shipping?: {label:string, cents:number|null, free?:boolean}|null, showShipping?: boolean, showTotal?: boolean }} opts
  */
-export function summaryRows(totals, { shipping = null, showShipping = false } = {}) {
+export function summaryRows(totals, { shipping = null, showShipping = false, showTotal = true } = {}) {
   const shippingCents = shipping?.cents ?? 0;
   const grand = totals.total + shippingCents;
 
@@ -34,6 +34,6 @@ export function summaryRows(totals, { shipping = null, showShipping = false } = 
     ${totals.savings > 0
       ? html`<div class="summary__row summary__row--savings"><dt>Economia</dt><dd>${money(totals.savings)}</dd></div>`
       : ''}
-    <div class="summary__row summary__row--total"><dt>Total</dt><dd>${money(grand)}</dd></div>
+    ${showTotal ? html`<div class="summary__row summary__row--total"><dt>Total</dt><dd>${money(grand)}</dd></div>` : ''}
   </dl>`;
 }

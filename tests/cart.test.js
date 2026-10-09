@@ -74,3 +74,27 @@ test('carrinho salvo com o conjunto como "promocional" é corrigido ao carregar'
   );
   assert.equal(brl(fresh.getState().totals.total), 'R$ 17,90');
 });
+
+test('limpar e desfazer: restore devolve os mesmos itens, a promocional e o total', () => {
+  cart.add(idOf('jesus-sentado'), 2);
+  cart.add(idOf('maria-sentada'));
+  cart.addBump(idOf('sao-jose-sentado'));
+  const before = cart.getState();
+  const snapshot = before.lines.map((l) => ({ productId: l.productId, qty: l.qty, bump: l.bump }));
+
+  cart.clear();
+  assert.equal(cart.getState().lines.length, 0);
+  assert.equal(cart.getState().totals.itemCount, 0);
+
+  cart.restore(snapshot);
+  const after = cart.getState();
+  assert.deepEqual(after.lines, before.lines);
+  assert.equal(after.totals.total, before.totals.total);
+  assert.equal(after.totals.bumpCount, 1);
+  assert.equal(brl(after.totals.total), 'R$ 61,23'); // 3 × 17,90 = 53,70 − 10% = 48,33, mais a promocional de 12,90
+});
+
+test('restore respeita as regras: promocional sem miniatura regular é descartada', () => {
+  cart.restore([{ productId: idOf('maria-sentada'), qty: 1, bump: true }]);
+  assert.equal(cart.getState().lines.length, 0);
+});

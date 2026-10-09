@@ -25,7 +25,7 @@ export const content = {
     title: 'Detalhes que fazem a diferença',
     items: [
       { icon: 'sparkle', title: 'Acabamento detalhado', text: 'Cada peça é cuidadosamente finalizada.' },
-      { icon: 'grid', title: 'Vários modelos disponíveis', text: 'Novos modelos entram no catálogo.' },
+      { icon: 'truck', title: 'Pronta entrega', text: 'Todos os modelos em estoque, prontos para envio.' },
       { icon: 'layers', title: 'Combine seus favoritos', text: 'Misture modelos no mesmo pedido.' },
       { icon: 'percent', title: 'Desconto progressivo', text: 'Quanto mais unidades, maior o desconto.' },
       { icon: 'box', title: 'Enviado com proteção', text: 'Embalagem pensada para o transporte.' },
