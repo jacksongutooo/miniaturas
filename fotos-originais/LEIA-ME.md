@@ -21,8 +21,11 @@ Aqui ficam as fotos **como foram recebidas**, organizadas em uma pasta por model
 | `boneco-de-neve/infografico-duvidas.jpeg` | `…at 11.56.34 (4).jpeg` | Perguntas e respostas do anúncio | referência |
 | `outros/nossos-santos-infografico.jpeg` | `…at 11.56.34.jpeg` | "Nossos Santos": São Bento, Frei Gilson, São José, Jesus, Maria e Santa Teresinha | referência — mostra modelos que ainda **não** estão no catálogo |
 | `outros/pagina-do-anuncio-1.jpeg` · `-2` · `-3` | `…at 11.56.35 (1).jpeg` · `(2)` · `.jpeg` | Capturas do anúncio "Mini Jesus Sentado 3D Decorativo 5 cm" (4,2 ★ · 44 avaliações · 550 vendidos) | referência (nome, tamanho, números do anúncio) |
+| `outros-produtos/` (13 arquivos `WhatsApp Image 2026-10-01 at 23.15.*.jpeg`) | `…2026-10-01 at 23.15.15` a `23.15.27` | Fotos de clientes de **outro produto** (sprays corporais "Bodyman", marca Primacial), sem texto de avaliação | não usadas — não são das miniaturas |
 
 "Referência" = serviu para conferir nome, tamanho e descrição; não vira foto de produto.
+
+A pasta `avaliacoes/` é onde entram os prints das avaliações reais das miniaturas (veja o `LEIA-ME.md` dela).
 
 ## Capas dos anúncios do TikTok Shop (`anuncios-tiktok/`)
 
