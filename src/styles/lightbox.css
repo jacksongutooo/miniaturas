@@ -1,0 +1,118 @@
+/* AMPLIAÇÃO DE FOTOS (tela cheia, com zoom por gesto) */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-lightbox);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: #0e0d0c;
+  color: #fff;
+}
+.lightbox__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px 16px;
+}
+.lightbox__count {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.lightbox__tools {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.lightbox__btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.lightbox__btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+/* No celular o zoom é por pinça; os botões +/- só aparecem com mouse. */
+.lightbox__btn--zoom {
+  display: none;
+}
+@media (hover: hover) {
+  .lightbox__btn--zoom {
+    display: grid;
+  }
+}
+
+.lightbox__viewport {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none; /* gestos tratados em pinchZoom.js */
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.is-zoomed .lightbox__viewport {
+  cursor: grab;
+}
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  display: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+.lightbox__nav--prev {
+  left: 16px;
+}
+.lightbox__nav--next {
+  right: 16px;
+}
+@media (hover: hover) and (min-width: 640px) {
+  .lightbox__nav {
+    display: grid;
+  }
+  .lightbox__nav[hidden] {
+    display: none;
+  }
+}
+.lightbox__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  font-size: 12.5px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.is-zoomed .lightbox__hint {
+  display: none;
+}
+@media (hover: hover) {
+  .lightbox__hint {
+    display: none;
+  }
+}

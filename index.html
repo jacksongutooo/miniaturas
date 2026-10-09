@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nome, descrição, favicon e cor vêm de src/config/store.js (substituídos pelo Vite). -->
+    <title>{{STORE_NAME}} | {{TITLE_SUFFIX}}</title>
+    <meta name="description" content="{{DESCRIPTION}}" />
+    <meta name="theme-color" content="{{THEME_COLOR}}" />
+    <link rel="icon" href="{{FAVICON}}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{STORE_NAME}}" />
+    <meta property="og:title" content="{{STORE_NAME}} | {{TITLE_SUFFIX}}" />
+    <meta property="og:description" content="{{DESCRIPTION}}" />
+    <meta property="og:image" content="{{SHARE_IMAGE}}" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>
+      <p style="padding: 24px; font-family: sans-serif">Para comprar, ative o JavaScript no seu navegador.</p>
+    </noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,461 @@
+/* CARRINHO LATERAL / TELA CHEIA + BARRA DE PROGRESSO + RESUMO + OFERTA */
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  visibility: hidden;
+}
+.drawer.is-open {
+  visibility: visible;
+}
+.drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 18, 16, 0.5);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.drawer.is-open .drawer__backdrop {
+  opacity: 1;
+}
+
+/* Celular: ocupa a tela toda. Desktop: painel lateral. */
+.drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #fff;
+  outline: none;
+  overscroll-behavior: contain;
+  transform: translateX(100%);
+  transition: transform 0.28s var(--ease);
+}
+.drawer.is-open .drawer__panel {
+  transform: none;
+}
+@media (min-width: 640px) {
+  .drawer__panel {
+    width: 460px;
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.drawer__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer__head .icon-btn:first-child:not(:last-child) {
+  margin-left: -10px;
+}
+.drawer__titles {
+  flex: 1;
+  min-width: 0;
+}
+.drawer__title {
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.drawer__sub {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.drawer__pin {
+  padding: 12px 18px 14px;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px;
+}
+
+.drawer__foot {
+  padding: 14px 18px calc(14px + var(--safe-bottom));
+  border-top: 1px solid var(--border);
+  background: #fff;
+  box-shadow: 0 -8px 20px rgba(31, 29, 27, 0.05);
+}
+.drawer__foot .btn {
+  margin-top: 12px;
+}
+.drawer__fine {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.drawer__empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 56px 12px;
+  text-align: center;
+}
+.drawer__empty-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.drawer__empty-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.drawer__empty .btn {
+  margin-top: 12px;
+}
+
+/* ── Barra de progresso do desconto ──────────────────────────────────────── */
+
+.progress {
+  --fill: 0;
+  display: grid;
+  gap: 10px;
+}
+.progress__msg {
+  display: grid;
+  gap: 2px;
+  min-height: 20px;
+}
+.progress__title {
+  font-size: 14.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--success);
+}
+.progress__hint {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+.progress__note {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.steps {
+  position: relative;
+  padding-top: 1px;
+}
+.steps__track {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 13px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--border);
+}
+.steps__fill {
+  width: calc(var(--fill) * 100%);
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 0.45s var(--ease);
+}
+.steps__list {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 28px;
+}
+.step__dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.step__label {
+  height: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 14px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.step.is-reached .step__dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.step.is-reached .step__label {
+  color: var(--accent-ink);
+}
+
+/* ── Itens do carrinho ───────────────────────────────────────────────────── */
+
+.line {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.line:last-child {
+  border-bottom: 0;
+}
+.line__media {
+  display: block;
+  width: 76px;
+  height: 76px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.line__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.line__info {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+}
+.line__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+}
+.line__pricing {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.line__pricing s {
+  color: var(--text-3);
+}
+.line__pricing .tag {
+  margin-left: 4px;
+}
+.line__total {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+.line__note {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.line__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.line__controls .stepper {
+  height: 38px;
+}
+.line__controls .stepper__btn {
+  width: 34px;
+  height: 34px;
+}
+.line__qty-fixed {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.line__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.line__remove:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+@media (max-width: 359px) {
+  .line__remove span {
+    display: none;
+  }
+}
+
+/* ── Resumo de valores ───────────────────────────────────────────────────── */
+
+.summary {
+  display: grid;
+  gap: 6px;
+}
+.summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.summary__row dd {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.summary__row--discount dd,
+.summary__row--savings dt,
+.summary__row--savings dd {
+  color: var(--success);
+}
+.summary__row--discount dd,
+.summary__row--savings dd {
+  font-weight: 700;
+}
+.summary__row--total {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-strong);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+/* ── Etapa "Antes de finalizar..." ───────────────────────────────────────── */
+
+.offer-list {
+  display: grid;
+  gap: 12px;
+  padding: 16px 0;
+}
+.offer-card {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.offer-card.is-added {
+  border-color: #b9dcc7;
+  background: var(--success-soft);
+}
+.offer-card__media {
+  display: block;
+  width: 84px;
+  height: 84px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.offer-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.offer-card__body {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+}
+.offer-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.offer-card__prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+.offer-card__to {
+  color: var(--text);
+}
+.offer-card__to strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent-ink);
+}
+.offer-card__text {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+.offer-card__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.offer-card__actions .btn {
+  min-height: 44px;
+  font-size: 14.5px;
+}
+.offer-card__added {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--success);
+}
+.offer-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: var(--text-2);
+}
+.offer-total strong {
+  color: var(--text);
+  font-size: 18px;
+}
+
+.offer-note {
+  padding: 0 4px 16px;
+  font-size: 13px;
+  color: var(--text-3);
+}

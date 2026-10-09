@@ -1,0 +1,10 @@
+/* Ordem importa: tokens → base → componentes. */
+@import './tokens.css';
+@import './base.css';
+@import './header.css';
+@import './catalog.css';
+@import './product.css';
+@import './cart.css';
+@import './checkout.css';
+@import './sections.css';
+@import './lightbox.css';

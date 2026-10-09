@@ -1,0 +1,16 @@
+{
+  "name": "loja-miniaturas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Loja de miniaturas — página de vendas com carrinho, descontos progressivos e checkout.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "devDependencies": {
+    "vite": "^8.0.0"
+  }
+}

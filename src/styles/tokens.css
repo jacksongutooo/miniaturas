@@ -1,0 +1,76 @@
+/*
+ * TOKENS DE DESIGN — cores, raios, sombras, espaçamento.
+ * Para trocar a cor de destaque da loja inteira, altere --accent (e as variações abaixo dela).
+ */
+:root {
+  color-scheme: light;
+
+  /* Superfícies e texto (neutros) */
+  --bg: #ffffff;
+  --bg-soft: #faf8f5; /* off-white */
+  --surface: #ffffff;
+  --surface-2: #f4f1ed; /* cinza muito claro */
+  --border: #e9e4de;
+  --border-strong: #d6cfc5;
+  --text: #1f1d1b;
+  --text-2: #57524c;
+  --text-3: #85807a;
+
+  /* Cor de destaque (provisória): terracota discreta */
+  --accent: #b8532f;
+  --accent-hover: #a14827;
+  --accent-ink: #9a4222; /* para texto sobre fundo claro */
+  --accent-soft: #fbeee8;
+  --accent-line: #f0cdbd;
+  --on-accent: #ffffff;
+
+  /* Estados */
+  --success: #2c7a52;
+  --success-soft: #e8f4ed;
+  --danger: #b3382c;
+  --danger-soft: #fdeeec;
+  --warn-soft: #fff4e5;
+  --star: #e6a23c;
+  --whatsapp: #25d366;
+
+  /* Forma */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --shadow-xs: 0 1px 2px rgba(31, 29, 27, 0.06);
+  --shadow-sm: 0 2px 8px rgba(31, 29, 27, 0.07);
+  --shadow-md: 0 8px 24px rgba(31, 29, 27, 0.1);
+  --shadow-lg: 0 16px 48px rgba(31, 29, 27, 0.18);
+
+  /* Layout */
+  --container: 1200px;
+  --gutter: 16px;
+  --header-row: 52px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Tipografia: fonte do sistema (carrega instantaneamente, sem requisição) */
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Camadas */
+  --z-header: 50;
+  --z-bar: 40;
+  --z-whatsapp: 45;
+  --z-drawer: 100;
+  --z-toast: 150;
+  --z-lightbox: 200;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --header-row: 72px;
+  }
+}
